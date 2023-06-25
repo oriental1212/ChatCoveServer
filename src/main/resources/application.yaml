@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://114.115.223.227:3306/ChatCove?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://114.115.223.227:3306/chatcove?useUnicode=true&characterEncoding=utf8
     username: root
     password: 1304206691Lh
     driver-class-name: com.mysql.cj.jdbc.Driver

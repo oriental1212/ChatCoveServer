@@ -6,13 +6,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.1.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
     <groupId>cool.oriental</groupId>
     <artifactId>ChatCoveServer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ChatCoveServer</name>
-    <description>ChatCoveServer</description>
+    <description>ChatCoveServer is a back-end project for an IM instant messaging system</description>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -26,7 +26,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <!--lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>
