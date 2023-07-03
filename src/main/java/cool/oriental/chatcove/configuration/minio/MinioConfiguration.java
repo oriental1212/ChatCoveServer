@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MinioConfiguration {
-    private static final String minioUrl = "114.115.223.227:3306";
+    private static final String minioUrl = "http://114.115.223.227:9000";
     private static final String account = "chatcoveminio";
     private static final String password = "chatcoveminio";
     @Bean

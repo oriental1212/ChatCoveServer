@@ -1,6 +1,8 @@
 package cool.oriental.chatcove.configuration.Authority;
 
 import cn.dev33.satoken.config.SaTokenConfig;
+import cn.dev33.satoken.jwt.StpLogicJwtForSimple;
+import cn.dev33.satoken.stp.StpLogic;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -22,12 +24,17 @@ public class SaTokenConfiguration {
                 .setTimeout(24 * 60 * 60)
                 .setActivityTimeout(-1)
                 .setIsConcurrent(false)
-                .setIsShare(true)
+                .setIsShare(false)
                 .setIsLog(false)
                 .setIsReadCookie(false)
                 .setIsLog(true)
                 .setLogLevel("error")
+                .setJwtSecretKey("chatcoveismyfavoritewebsite")
                 .setTokenStyle("simple-uuid");
         return config;
+    }
+    @Bean
+    public StpLogic getStpLogicJwt() {
+        return new StpLogicJwtForSimple();
     }
 }

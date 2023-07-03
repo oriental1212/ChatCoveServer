@@ -2,6 +2,13 @@ server:
   port: 1211
 
 spring:
+  #mail
+  mail:
+    host: smtp.163.com
+    username: 13891655545@163.com
+    password: JVOEXUUTLQQPUASV
+    default-encoding: UTF-8
+    port: 465
   datasource:
     url: jdbc:mysql://114.115.223.227:3306/chatcove?useUnicode=true&characterEncoding=utf8
     username: root
@@ -14,6 +21,7 @@ spring:
       database: 1
       # Redis服务器地址
       host: 114.115.223.227
+      password: 130420
       # Redis服务器连接端口
       port: 6379
       # Redis服务器连接密码（默认为空）
@@ -37,3 +45,22 @@ springdoc:
       paths-to-match: '/**'
       packages-to-scan:
         - com.cool.chatcove.controller
+
+rocketmq:
+  consumer:
+    group: springboot_consumer_group
+    pull-batch-size: 10
+  name-server: 114.115.223.227:9876
+  producer:
+    group: springboot_producer_group
+    send-message-timeout: 1000
+    retry-times-when-send-failed: 2
+    # 异步消息重试此处，默认2
+    retry-times-when-send-async-failed: 2
+    # 消息最大长度，默认1024 * 1024 * 4(默认4M)
+    max-message-size: 4096
+    # 压缩消息阈值，默认4k(1024 * 4)
+    compress-message-body-threshold: 4096
+    # 是否在内部发送失败时重试另一个broker，默认false
+    retry-next-server: false
+
