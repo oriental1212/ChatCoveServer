@@ -44,7 +44,7 @@ public class ChannelGroup implements Serializable {
      * 创建者id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 
     /**
      * 分组名称

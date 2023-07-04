@@ -44,7 +44,7 @@ public class MessageUnread implements Serializable {
      * 用户id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 
     /**
      * 频道中用户最后活跃时间

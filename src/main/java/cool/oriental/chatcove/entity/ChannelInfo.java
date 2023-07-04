@@ -50,7 +50,7 @@ public class ChannelInfo implements Serializable {
      * 创建者id
      */
     @TableField("master_id")
-    private Integer masterId;
+    private Long masterId;
 
     /**
      * 频道描述

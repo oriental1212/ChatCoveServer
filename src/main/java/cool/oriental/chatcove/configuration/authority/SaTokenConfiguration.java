@@ -1,4 +1,4 @@
-package cool.oriental.chatcove.configuration.Authority;
+package cool.oriental.chatcove.configuration.authority;
 
 import cn.dev33.satoken.config.SaTokenConfig;
 import cn.dev33.satoken.jwt.StpLogicJwtForSimple;

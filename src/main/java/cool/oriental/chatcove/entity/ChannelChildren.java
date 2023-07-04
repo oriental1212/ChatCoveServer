@@ -50,7 +50,7 @@ public class ChannelChildren implements Serializable {
      * 创建者id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 
     /**
      * 子频道名称

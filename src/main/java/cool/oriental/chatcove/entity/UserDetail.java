@@ -38,7 +38,7 @@ public class UserDetail implements Serializable {
      * 用户id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 
     /**
      * 用户昵称

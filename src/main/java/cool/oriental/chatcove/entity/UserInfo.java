@@ -32,7 +32,7 @@ public class UserInfo implements Serializable {
      * 用户id
      */
     @TableId("id")
-    private Integer id;
+    private Long id;
 
     /**
      * 用户名

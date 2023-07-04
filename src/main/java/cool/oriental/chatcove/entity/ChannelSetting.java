@@ -44,7 +44,7 @@ public class ChannelSetting implements Serializable {
      * 用户id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 
     /**
      * 设置类型

@@ -38,7 +38,7 @@ public class MessageGroup implements Serializable {
      * 发送用户id
      */
     @TableField("sender_id")
-    private Integer senderId;
+    private Long senderId;
 
     /**
      * 子频道id

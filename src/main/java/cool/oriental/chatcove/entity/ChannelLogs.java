@@ -44,7 +44,7 @@ public class ChannelLogs implements Serializable {
      * 生成日志用户id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 
     /**
      * 日志生成时间

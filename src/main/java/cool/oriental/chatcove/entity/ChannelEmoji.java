@@ -62,5 +62,5 @@ public class ChannelEmoji implements Serializable {
      * 上传用户id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 }

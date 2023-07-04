@@ -38,13 +38,13 @@ public class MessagePrivate implements Serializable {
      * 发送用户id
      */
     @TableField("sender_id")
-    private Integer senderId;
+    private Long senderId;
 
     /**
      * 接收用户id
      */
     @TableField("receiver_id")
-    private Integer receiverId;
+    private Long receiverId;
 
     /**
      * 消息类型

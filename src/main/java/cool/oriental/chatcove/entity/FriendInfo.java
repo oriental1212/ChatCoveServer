@@ -38,13 +38,13 @@ public class FriendInfo implements Serializable {
      * 用户id
      */
     @TableField("user_id")
-    private Integer userId;
+    private Long userId;
 
     /**
      * 用户id
      */
     @TableField("friend_id")
-    private Integer friendId;
+    private Long friendId;
 
     /**
      * 创建时间
