@@ -6,7 +6,7 @@ package cool.oriental.chatcove.configuration.mail;
  * @Description: mail枚举类
  */
 public enum EnumMail {
-    CAPTCHA,
+    EMAIL_CAPTCHA,
     NORMAL;
 
     public EnumMail getFlag(){

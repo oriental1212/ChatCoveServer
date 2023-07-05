@@ -32,14 +32,10 @@ public class MailConfiguration {
     @Value("${spring.mail.username}")
     private String sender;
 
-    public void sendTemplateMail(String receiverEmail, EnumMail enumMail){
+    public void sendTemplateMail(String receiverEmail, Object message,EnumMail enumMail){
         switch (enumMail){
-            case CAPTCHA -> {
-                CaptchaTemplate(receiverEmail);
-            }
-            case NORMAL -> {
-                normalTemplate();
-            }
+            case EMAIL_CAPTCHA -> CaptchaTemplate(receiverEmail,message);
+            case NORMAL -> normalTemplate();
         }
     }
     /*
@@ -49,7 +45,7 @@ public class MailConfiguration {
      * @Author: Oriental
      * @Date: 2023/7/2
      */
-    public void CaptchaTemplate(String receiverEmail){
+    public void CaptchaTemplate(String receiverEmail, Object message){
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
@@ -72,7 +68,6 @@ public class MailConfiguration {
             log.error("发送邮件失败：{}",e.getMessage());
             e.printStackTrace();
         }
-        return;
     }
 
     /*
@@ -83,6 +78,5 @@ public class MailConfiguration {
     * @Date: 2023/7/2
     */
     public void normalTemplate(){
-        return;
     }
 }

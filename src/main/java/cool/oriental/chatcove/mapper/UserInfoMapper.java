@@ -11,6 +11,7 @@ import cool.oriental.chatcove.entity.UserInfo;
  * @author oriental
  * @since 2023-06-25 01:23:32
  */
+
 public interface UserInfoMapper extends BaseMapper<UserInfo> {
 
 }

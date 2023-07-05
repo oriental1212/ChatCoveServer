@@ -1,7 +1,5 @@
 package cool.oriental.chatcove.utils;
 
-import org.springframework.context.annotation.Bean;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
