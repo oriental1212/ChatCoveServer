@@ -1,5 +1,6 @@
 package cool.oriental.chatcove.configuration.mail;
 
+import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.Data;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 /**
@@ -49,23 +50,22 @@ public class MailConfiguration {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
-            messageHelper.setFrom(sender);  //发送人邮箱
+            messageHelper.setFrom(sender,"ChatCove");  //发送人邮箱
             messageHelper.setTo(receiverEmail); //接收人邮箱
             messageHelper.setSubject("找回密码");   //邮件标题
             // 使用Thymeleaf模板
             Context context = new Context();
             HashMap<String, Object> map = new HashMap<>();
-            /*
-            * 放入一些参数
-            * map.put("xxx",xxx);
-            * */
+            map.put("captcha",message);
             context.setVariables(map);
-            String emailContent = templateEngine.process("findPassword", context);
-
-            messageHelper.setText(emailContent);
+            String emailContent = templateEngine.process("SendCaptcha", context);
+            messageHelper.setText(emailContent, true);
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
             log.error("发送邮件失败：{}",e.getMessage());
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            log.error("设置发件人失败");
             e.printStackTrace();
         }
     }

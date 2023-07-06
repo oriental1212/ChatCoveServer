@@ -12,9 +12,11 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-public class LoginByCaptchaInfo {
+public class CheckByCaptchaInfo {
     @NotNull(message = "用户账户不能为空")
     private String account;
     @NotNull(message = "用户验证码不能为空")
     private String captcha;
+    @NotNull(message = "验证码类型校验位不能为空")
+    private String sendFlag;
 }

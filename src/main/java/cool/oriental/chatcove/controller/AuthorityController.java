@@ -2,7 +2,8 @@ package cool.oriental.chatcove.controller;
 
 import cool.oriental.chatcove.configuration.exception.Result;
 import cool.oriental.chatcove.service.AuthorityService;
-import cool.oriental.chatcove.vo.LoginByCaptchaInfo;
+import cool.oriental.chatcove.vo.ChangePasswordInfo;
+import cool.oriental.chatcove.vo.CheckByCaptchaInfo;
 import cool.oriental.chatcove.vo.LoginInfo;
 import cool.oriental.chatcove.vo.RegisterInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,13 +39,25 @@ public class AuthorityController {
 
     @PostMapping("/sendCaptcha")
     @Operation(summary = "发送验证码接口")
-    public Result<String> SendCaptcha(@RequestParam(value = "account") @Parameter(description = "用户账户") String account){
-        return authorityService.SendCaptcha(account);
+    public Result<String> SendCaptcha(@RequestParam(value = "account") @Parameter(description = "用户账户") String account,@RequestParam(value = "sendFlag") @Parameter(description = "发送标志位") String sendFlag){
+        return authorityService.SendCaptcha(account,sendFlag);
     }
 
     @PostMapping("/loginByCaptcha")
     @Operation(summary = "验证码用户登录接口")
-    public Result<String> LoginByCaptcha(@RequestBody @Valid @Parameter(description = "验证码用户登录vo类") LoginByCaptchaInfo loginByCaptchaInfo){
-        return authorityService.LoginByCaptcha(loginByCaptchaInfo);
+    public Result<String> LoginByCaptcha(@RequestBody @Valid @Parameter(description = "验证码校验vo类") CheckByCaptchaInfo checkByCaptchaInfo){
+        return authorityService.LoginByCaptcha(checkByCaptchaInfo);
+    }
+
+    @PostMapping("/findPassword")
+    @Operation(summary = "请求找回密码接口")
+    public Result<String> FindPassword(@RequestBody @Valid @Parameter(description = "验证码校验vo类") CheckByCaptchaInfo checkByCaptchaInfo){
+        return authorityService.FindPassword(checkByCaptchaInfo);
+    }
+
+    @PostMapping("/changePassword")
+    @Operation(summary = "修改密码接口")
+    public Result<String> ChangePassword(@RequestBody @Valid @Parameter(description = "用户修改密码vo类") ChangePasswordInfo changePasswordInfo){
+        return authorityService.ChangePassword(changePasswordInfo);
     }
 }

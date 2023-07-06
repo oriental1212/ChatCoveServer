@@ -2,13 +2,22 @@ server:
   port: 1211
 
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher #基于AntPathMatcher的路径匹配
+  # thymeleaf
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
   #mail
   mail:
     host: smtp.163.com
     username: 13891655545@163.com
     password: JVOEXUUTLQQPUASV
     default-encoding: UTF-8
-    port: 465
+    port: 25
+    protocol: smtp
   datasource:
     url: jdbc:mysql://114.115.223.227:3306/chatcove?useUnicode=true&characterEncoding=utf8
     username: root
