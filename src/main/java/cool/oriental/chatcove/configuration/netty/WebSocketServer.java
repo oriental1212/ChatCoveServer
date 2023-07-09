@@ -37,7 +37,6 @@ public class WebSocketServer {
                 .bind(nettPort)
                 .sync()
                 .channel();
-
         log.info("服务端启动成功，端口号：{}", nettPort);
         channel
                 .closeFuture()

@@ -1,6 +1,5 @@
 package cool.oriental.chatcove.configuration.netty.handler;
 
-import com.alibaba.fastjson.JSON;
 import cool.oriental.chatcove.configuration.netty.NettyConfiguration;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -26,9 +25,9 @@ import java.util.Arrays;
 @Component
 @ChannelHandler.Sharable
 public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
-    public static final Integer USER_ID = null;
+    public static final String USER_ID = "userId";
     public NettyTextHandler() {
-        log.info("执行NettyTextHandler中...");
+        log.info("初始化NettyTextHandler中...");
     }
 
     /**
@@ -82,13 +81,13 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
      * 当接收到前端发送的WebSocket时处理
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg){
-
+    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
         //接收到的文本信息的二进制形式
         ByteBuf content = msg.content();
 
         //接收到的文本信息
         String text = msg.text();
+        ctx.channel().writeAndFlush(new TextWebSocketFrame("你好"));
         /*根据类型进行消息的出路*/
         //获取到该条消息的标识，前端的字段必须后端的枚举名大小写一致
         //根据消息类型进行不同业务处理
@@ -174,11 +173,11 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
     private void cleanChannel(Channel channel) {
         //获取客户端 Channel 中存储的名为 userId 的 Attribute
         Attribute<String> userIdKey = channel.attr(AttributeKey.valueOf(String.valueOf(USER_ID)));
-        String userId = userIdKey.get();
+        Long userId = Long.parseLong(userIdKey.get());
         //从 ChannelGroup 中移除断开的 Channel
         NettyConfiguration.getOnlineChannelGroup().remove(channel);
         //从 Map 中移除 UserId 与 Channel 的对照关系
-        NettyConfiguration.getOnlineUserChannelMap().remove(Integer.valueOf(userId));
+        NettyConfiguration.getOnlineUserChannelMap().remove(userId);
 
         //通知所有用户某用户下线了
         NettyConfiguration.getOnlineChannelGroup().writeAndFlush(new TextWebSocketFrame(

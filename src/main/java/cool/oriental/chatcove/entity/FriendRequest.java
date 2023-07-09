@@ -13,54 +13,39 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>
- * 
- * </p>
- *
- * @author oriental
- * @since 2023-06-25 01:23:32
+ * @Author: Oriental
+ * @Date: 2023-07-09-15:20
+ * @Description: 好友请求实体类
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("friend_info")
-public class FriendInfo implements Serializable {
+@TableName("friend_request")
+public class FriendRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * 好友关系id
+     * 好友请求id
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
-     * 用户id
+     * 发送者id
      */
-    @TableField("user_id")
-    private Long userId;
+    @TableField("sender_id")
+    private Long senderId;
 
     /**
-     * 用户id
+     * 接收者id
      */
-    @TableField("friend_id")
-    private Long friendId;
+    @TableField("receiver_id")
+    private Long receiverId;
 
     /**
      * 创建时间
      */
     @TableField("create_time")
     private LocalDateTime createTime;
-
-    /**
-     * 关系状态
-     */
-    @TableField("status")
-    private Integer status;
-
-    /**
-     * 好友备注名
-     */
-    @TableField("remark_name")
-    private String remarkName;
 }

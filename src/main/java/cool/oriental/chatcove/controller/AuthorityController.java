@@ -60,4 +60,10 @@ public class AuthorityController {
     public Result<String> ChangePassword(@RequestBody @Valid @Parameter(description = "用户修改密码vo类") ChangePasswordInfo changePasswordInfo){
         return authorityService.ChangePassword(changePasswordInfo);
     }
+
+    @PostMapping("/logout")
+    @Operation(summary = "用户登出接口")
+    public Result<String> Logout(){
+        return authorityService.Logout();
+    }
 }

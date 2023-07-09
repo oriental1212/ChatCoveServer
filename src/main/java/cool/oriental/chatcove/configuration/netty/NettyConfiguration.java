@@ -20,7 +20,7 @@ public class NettyConfiguration {
     private static final ChannelGroup onlineChannelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     // 存储所有在线的UserId与之对应的Channel
-    private static final ConcurrentMap<Integer, Channel> onlineUserChannelMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Long, Channel> onlineUserChannelMap = new ConcurrentHashMap<>();
     /**
      * 获取所有在线的客户端Channel
      */
@@ -31,7 +31,10 @@ public class NettyConfiguration {
     /**
      * 获取所有在线的UserId与之对应的Channel
      */
-    public static ConcurrentMap<Integer, Channel> getOnlineUserChannelMap() {
+    public static ConcurrentMap<Long, Channel> getOnlineUserChannelMap() {
         return onlineUserChannelMap;
+    }
+
+    public static void main(String[] args) {
     }
 }

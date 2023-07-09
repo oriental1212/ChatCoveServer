@@ -29,8 +29,7 @@ public class SaTokenConfiguration {
                 .setIsReadCookie(false)
                 .setIsLog(true)
                 .setLogLevel("error")
-                .setJwtSecretKey("chatcoveismyfavoritewebsite")
-                .setTokenStyle("simple-uuid");
+                .setJwtSecretKey("chatcoveismyfavoritewebsite");
         return config;
     }
     @Bean

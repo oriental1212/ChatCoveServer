@@ -19,4 +19,5 @@ public interface AuthorityService {
     Result<String> SendCaptcha(String account, String sendFlag);
     Result<String> FindPassword(CheckByCaptchaInfo checkByCaptchaInfo);
     Result<String> ChangePassword(ChangePasswordInfo changePasswordInfo);
+    Result<String> Logout();
 }

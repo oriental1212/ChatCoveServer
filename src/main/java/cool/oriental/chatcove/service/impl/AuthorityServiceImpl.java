@@ -186,6 +186,19 @@ public class AuthorityServiceImpl implements AuthorityService {
         return Result.success("修改密码成功");
     }
 
+    @Override
+    public Result<String> Logout() {
+        long userID = StpUtil.getLoginIdAsLong();
+        try {
+            StpUtil.logout(userID);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("用户登出业务异常");
+            return Result.error("服务器异常，用户登出失败，请稍后重试");
+        }
+        return Result.success("用户登出成功");
+    }
+
     // 查看验证码是否存在和正确
     private boolean CheckCaptcha(String userAccount, String captcha){
         if(redisTemplate.hasKey(userAccount) != Boolean.TRUE){
