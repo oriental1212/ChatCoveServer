@@ -1,6 +1,10 @@
 package cool.oriental.chatcove.service;
 
 import cool.oriental.chatcove.configuration.exception.Result;
+import cool.oriental.chatcove.vo.AllFriendsInfo;
+import cool.oriental.chatcove.vo.FriendsRequestInfo;
+
+import java.util.List;
 
 /**
  * @Author: Oriental
@@ -12,5 +16,7 @@ public interface FriendsService {
     Result<String> ConfirmFriendsRequest(Integer friendRequestId, String senderName);
     Result<String> DeleteFriends(Long friendId);
     Result<String> BlacklistFriends(Long friendId);
-    Result<String> ShowAllFriends();
+    Result<String> RemarkFriends(Long friendId, String remarkName);
+    Result<List<AllFriendsInfo>> ShowAllFriends();
+    Result<List<FriendsRequestInfo>> GetFriendsRequest();
 }

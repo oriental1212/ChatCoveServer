@@ -2,6 +2,8 @@ package cool.oriental.chatcove.controller;
 
 import cool.oriental.chatcove.configuration.exception.Result;
 import cool.oriental.chatcove.service.FriendsService;
+import cool.oriental.chatcove.vo.AllFriendsInfo;
+import cool.oriental.chatcove.vo.FriendsRequestInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Author: Oriental
@@ -50,9 +54,24 @@ public class FriendsController {
         return friendsService.BlacklistFriends(friendId);
     }
 
+    @PostMapping("/remarkFriends")
+    @Operation(summary = "好友重命名接口")
+    public Result<String> RemarkFriends(
+            @RequestParam(value = "friendId") @Parameter(description = "好友id") Long friendId,
+            @RequestParam(value = "remarkName") @Parameter(description = "好友重命名名字") String remarkName
+    ){
+        return friendsService.RemarkFriends(friendId, remarkName);
+    }
+
     @PostMapping("/showAllFriends")
     @Operation(summary = "展示所有用户接口")
-    public Result<String> ShowAllFriends(){
+    public Result<List<AllFriendsInfo>> ShowAllFriends(){
         return friendsService.ShowAllFriends();
+    }
+
+    @PostMapping("/getFriendsRequest")
+    @Operation(summary = "获取好友请求")
+    public Result<List<FriendsRequestInfo>> GetFriendsRequest(){
+        return friendsService.GetFriendsRequest();
     }
 }

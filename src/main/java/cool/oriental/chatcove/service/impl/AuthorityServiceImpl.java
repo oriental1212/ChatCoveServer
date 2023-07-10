@@ -96,7 +96,6 @@ public class AuthorityServiceImpl implements AuthorityService {
         }
     }
 
-
     @Override
     public Result<String> SendCaptcha(String account, String sendFlag) {
         UserInfo userInfo = UserHasInfo(account);

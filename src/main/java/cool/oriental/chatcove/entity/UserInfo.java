@@ -53,16 +53,10 @@ public class UserInfo implements Serializable {
     private String email;
 
     /**
-     * 永辉角色
+     * 用户角色
      */
     @TableField("role")
     private String role;
-
-    /**
-     * 手机号
-     */
-    @TableField("phone")
-    private String phone;
 
     /**
      * 用户状态
@@ -75,12 +69,6 @@ public class UserInfo implements Serializable {
      */
     @TableField("tencent_key")
     private String tencentKey;
-
-    /**
-     * 微信号
-     */
-    @TableField("wechat_key")
-    private String wechatKey;
 
     /**
      * 创建时间

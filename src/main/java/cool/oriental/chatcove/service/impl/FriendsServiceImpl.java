@@ -13,9 +13,13 @@ import cool.oriental.chatcove.mapper.FriendRequestMapper;
 import cool.oriental.chatcove.mapper.UserInfoMapper;
 import cool.oriental.chatcove.service.FriendsService;
 import cool.oriental.chatcove.utils.FriendsStatus;
+import cool.oriental.chatcove.vo.AllFriendsInfo;
+import cool.oriental.chatcove.vo.FriendsRequestInfo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @Author: Oriental
@@ -147,8 +151,41 @@ public class FriendsServiceImpl implements FriendsService {
     }
 
     @Override
-    public Result<String> ShowAllFriends() {
-        return null;
+    public Result<String> RemarkFriends(Long friendId, String remarkName) {
+        try {
+            LambdaUpdateWrapper<FriendInfo> friendWrapper = new LambdaUpdateWrapper<>();
+            friendWrapper
+                    .eq(FriendInfo::getUserId, StpUtil.getLoginIdAsLong())
+                    .eq(FriendInfo::getFriendId, friendId)
+                    .set(FriendInfo::getRemarkName, remarkName);
+            friendInfoMapper.update(null, friendWrapper);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("重命名好友业务出错");
+            return Result.error("服务器异常，重命名好友出错，请稍后重试");
+        }
+        return Result.success("好友重命名成功");
     }
 
+    @Override
+    public Result<List<AllFriendsInfo>> ShowAllFriends() {
+        try {
+            return Result.success(friendInfoMapper.ShowAllFriends(StpUtil.getLoginIdAsLong()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("查询好友业务出错");
+            return Result.error("服务器异常，查询好友出错，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<List<FriendsRequestInfo>> GetFriendsRequest() {
+        try {
+            return Result.success(friendRequestMapper.GetFriendsRequest(StpUtil.getLoginIdAsLong()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取好友请求业务出错");
+            return Result.error("服务器异常，获取好友请求出错，请稍后重试");
+        }
+    }
 }

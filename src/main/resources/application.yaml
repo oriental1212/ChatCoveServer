@@ -64,4 +64,5 @@ rocketmq:
     compress-message-body-threshold: 4096
     # 是否在内部发送失败时重试另一个broker，默认false
     retry-next-server: false
-
+mybatis-plus:
+  mapper-locations: classpath*:/mappers/*.xml
