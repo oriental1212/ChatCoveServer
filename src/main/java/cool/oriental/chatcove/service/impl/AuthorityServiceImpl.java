@@ -44,7 +44,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     @Resource
     MailConfiguration mailConfiguration;
     @Resource
-    RedisTemplate<String, Object> redisTemplate;
+    RedisTemplate<String, Object> RedisTemplate;
 
     @Override
     public Result<String> Register(RegisterInfo registerInfo) {
@@ -102,7 +102,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         if(userInfo == null){
             return Result.error("用户不存在，请先注册");
         }
-        if(redisTemplate.hasKey(account) == Boolean.TRUE){
+        if(RedisTemplate.hasKey(account) == Boolean.TRUE){
             return Result.error("已经发送了验证码注意查收你的邮箱");
         }
         String captcha = new CaptchaGenerator().CaptchaCreate();
@@ -110,12 +110,12 @@ public class AuthorityServiceImpl implements AuthorityService {
         if(account.contains("@")){
             try {
                 mailConfiguration.sendTemplateMail(account, captcha, EnumMail.EMAIL_CAPTCHA);
-                redisTemplate.opsForValue().set(account+sendFlag,captcha,5, TimeUnit.MINUTES);
+                RedisTemplate.opsForValue().set(account+sendFlag,captcha,5, TimeUnit.MINUTES);
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("邮箱验证码发送失败");
-                if(Boolean.TRUE.equals(redisTemplate.hasKey(account))){
-                    redisTemplate.delete(account+sendFlag);
+                if(Boolean.TRUE.equals(RedisTemplate.hasKey(account))){
+                    RedisTemplate.delete(account+sendFlag);
                 }
                 return Result.error("服务器异常，获取邮箱验证码失败，请稍后重试");
             }
@@ -148,7 +148,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         try {
             boolean flag = CheckCaptcha(checkByCaptchaInfo.getAccount() + checkByCaptchaInfo.getSendFlag(), checkByCaptchaInfo.getCaptcha());
             if(flag){
-                redisTemplate.opsForValue().set(checkByCaptchaInfo.getAccount()+"ChangeChance", "Only");
+                RedisTemplate.opsForValue().set(checkByCaptchaInfo.getAccount()+"ChangeChance", "Only");
                 return Result.success("用户验证码校验成功");
             }else {
                 return Result.error("验证码校验出错，请输入正确验证码或重试");
@@ -156,8 +156,8 @@ public class AuthorityServiceImpl implements AuthorityService {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("验证码校验异常");
-            if(Boolean.TRUE.equals(redisTemplate.hasKey(checkByCaptchaInfo.getAccount()+"ChangeChance"))){
-                redisTemplate.delete(checkByCaptchaInfo.getAccount()+"ChangeChance");
+            if(Boolean.TRUE.equals(RedisTemplate.hasKey(checkByCaptchaInfo.getAccount()+"ChangeChance"))){
+                RedisTemplate.delete(checkByCaptchaInfo.getAccount()+"ChangeChance");
             }
             return Result.error("服务器异常，验证码校验失败，请稍后重试");
         }
@@ -165,7 +165,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     @Override
     public Result<String> ChangePassword(ChangePasswordInfo changePasswordInfo) {
-        if(redisTemplate.hasKey(changePasswordInfo.getAccount()+"ChangeChance") != Boolean.TRUE){
+        if(RedisTemplate.hasKey(changePasswordInfo.getAccount()+"ChangeChance") != Boolean.TRUE){
             return Result.error("你没有资格修改密码，请发送校验码请求");
         }
         if(!changePasswordInfo.getPassword().equals(changePasswordInfo.getRepeatPassword())){
@@ -200,12 +200,12 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     // 查看验证码是否存在和正确
     private boolean CheckCaptcha(String userAccount, String captcha){
-        if(redisTemplate.hasKey(userAccount) != Boolean.TRUE){
+        if(RedisTemplate.hasKey(userAccount) != Boolean.TRUE){
             // 验证码不存在
             return false;
         }
-        if(Objects.equals(redisTemplate.opsForValue().get(userAccount), captcha)){
-            redisTemplate.delete(userAccount);
+        if(Objects.equals(RedisTemplate.opsForValue().get(userAccount), captcha)){
+            RedisTemplate.delete(userAccount);
             return true;
         }else{
             // 验证码错误

@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 /**
  * @Author: Oriental
  * @Date: 2023-07-06-15:24
- * @Description: 更改用户密码接口
+ * @Description: 更改用户密码类
  */
 
 @Data
