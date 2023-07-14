@@ -1,6 +1,7 @@
 package cool.oriental.chatcove.service;
 
 import cool.oriental.chatcove.configuration.exception.Result;
+import cool.oriental.chatcove.vo.channel.CreateChannelInfo;
 
 /**
  * @Author: Oriental
@@ -8,5 +9,5 @@ import cool.oriental.chatcove.configuration.exception.Result;
  * @Description: 频道服务接口
  */
 public interface ChannelService {
-    public Result<String> CreateMasterChannel();
+    public Result<String> CreateMasterChannel(CreateChannelInfo createChannelInfo);
 }

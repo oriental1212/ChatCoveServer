@@ -66,3 +66,8 @@ rocketmq:
     retry-next-server: false
 mybatis-plus:
   mapper-locations: classpath*:/mappers/*.xml
+
+minio:
+  url: http://114.115.223.227:9000
+  account: chatcoveminio
+  password: chatcoveminio

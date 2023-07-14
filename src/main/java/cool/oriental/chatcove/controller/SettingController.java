@@ -34,8 +34,8 @@ public class SettingController {
         return settingService.SendCaptchaToChangPassword();
     }
 
-    @PostMapping("/sendCaptchaToChangPassword")
-    @Operation(summary = "发送验证码核验用户修改密码")
+    @PostMapping("/changePassword")
+    @Operation(summary = "用户修改密码")
     public Result<String> ChangePassword(
             @RequestParam(value = "password") @Parameter(description = "用户密码") String password,
             @RequestParam(value = "captcha") @Parameter(description = "用户密码") String captcha
