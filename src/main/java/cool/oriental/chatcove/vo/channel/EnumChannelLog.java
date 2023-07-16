@@ -11,13 +11,16 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum EnumChannelLog {
-    CHANNEL_INSERT,
-    CHANNEL_UPDATE,
-    CHANNEL_DELETE,
-    ROLE_INSERT,
-    ROLE_UPDATE,
-    ROLE_DELETE,
-    GROUP_INSERT,
-    GROUP_UPDATE,
-    GROUP_DELETE;
+    CHANNEL_INSERT(10,"添加频道"),
+    CHANNEL_UPDATE(11,"更新频道"),
+    CHANNEL_DELETE(12,"删除频道"),
+    ROLE_INSERT(20,"添加角色"),
+    ROLE_UPDATE(21,"更新角色"),
+    ROLE_DELETE(22,"删除角色"),
+    GROUP_INSERT(30,"添加组"),
+    GROUP_UPDATE(31,"更新组"),
+    GROUP_DELETE(32,"删除组");
+
+    private final Integer type;
+    private final String content;
 }

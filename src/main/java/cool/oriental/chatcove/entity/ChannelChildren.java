@@ -65,7 +65,7 @@ public class ChannelChildren implements Serializable {
     private String description;
 
     /**
-     * 子频道类型
+     * 子频道类型,0是文字，1是语音
      */
     @TableField("type")
     private Integer type;

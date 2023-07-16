@@ -35,7 +35,7 @@ public class ChannelLogs implements Serializable {
     private Integer id;
 
     /**
-     * 频道id
+     * 主频道id
      */
     @TableField("channel_id")
     private Integer channelId;
