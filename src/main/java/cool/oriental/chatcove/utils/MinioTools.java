@@ -1,5 +1,6 @@
 package cool.oriental.chatcove.utils;
 
+import cn.hutool.core.date.DateUtil;
 import cool.oriental.chatcove.configuration.minio.MinioConfiguration;
 import cool.oriental.chatcove.configuration.minio.MinioEnum;
 import io.minio.*;
@@ -23,6 +24,9 @@ public class MinioTools {
             case "channel_avatar" -> {
                 return ChannelAvatarUpload(multipartFile, channelId);
             }
+            case "channel_emoji_upload" -> {
+                return ChannelEmojiUpload(multipartFile, channelId);
+            }
             case "user" -> System.out.println("USER_AVATAR");
         }
         return Boolean.FALSE;
@@ -38,10 +42,22 @@ public class MinioTools {
         return Boolean.FALSE;
     }
 
+    public Boolean Delete(Integer channelId, String name, MinioEnum minioEnum){
+        switch (minioEnum.getType()){
+            case "channel_emoji_delete" -> {
+                return ChannelEmojiDelete(channelId, name);
+            }
+            case "other" -> {
+                System.out.println("other");
+            }
+        }
+        return Boolean.FALSE;
+    }
+
     private Boolean ChannelAvatarUpload(MultipartFile multipartFile, Integer channelId){
         String objectName = channelId+"/"+"channelAvatar";
         try {
-            ObjectWriteResponse channel = minioConfiguration.MinioCreator().putObject(
+            minioConfiguration.MinioCreator().putObject(
                     PutObjectArgs
                             .builder()
                             .bucket("channel")
@@ -54,6 +70,26 @@ public class MinioTools {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("上传文件工具类异常，频道头像上传失败");
+            return Boolean.FALSE;
+        }
+    }
+
+    private Boolean ChannelEmojiUpload(MultipartFile multipartFile, Integer channelId){
+        String objectName = channelId+"/"+multipartFile.getOriginalFilename()+"-"+ DateUtil.thisDayOfMonth();
+        try{
+            minioConfiguration.MinioCreator().putObject(
+                    PutObjectArgs
+                            .builder()
+                            .bucket("channel")
+                            .object(objectName)
+                            .stream(multipartFile.getInputStream(), multipartFile.getSize(), -1)
+                            .contentType(multipartFile.getContentType())
+                            .build()
+            );
+            return Boolean.TRUE;
+        } catch (Exception e){
+            e.printStackTrace();
+            log.error("上传文件工具类异常，频道表情上传失败");
             return Boolean.FALSE;
         }
     }
@@ -84,5 +120,9 @@ public class MinioTools {
             log.error("删除文件工具类异常，频道删除失败");
             return Boolean.FALSE;
         }
+    }
+
+    private Boolean ChannelEmojiDelete(Integer channelId, String emojiName){
+        return Boolean.TRUE;
     }
 }

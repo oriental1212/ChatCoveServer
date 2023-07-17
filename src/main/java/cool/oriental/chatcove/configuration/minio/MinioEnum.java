@@ -13,8 +13,9 @@ import lombok.Getter;
 @Getter
 public enum MinioEnum {
     CHANNEL_AVATAR("channel_avatar","服务器头像上传"),
-    CHANNEL_EMOJI("channel_emoji", "服务器表情上传"),
     CHANNEL_DELETE("channel_delete", "服务器头像删除"),
+    CHANNEL_EMOJI_UPLOAD("channel_emoji_upload", "服务器表情上传"),
+    CHANNEL_EMOJI_DELETE("channel_emoji_delete", "服务器表情删除"),
     USER_AVATAR("user_avatar", "用户头像上传");
 
     private final String type;

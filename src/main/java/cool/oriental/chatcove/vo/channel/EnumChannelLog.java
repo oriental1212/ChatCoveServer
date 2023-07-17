@@ -19,7 +19,10 @@ public enum EnumChannelLog {
     ROLE_DELETE(22,"删除角色"),
     GROUP_INSERT(30,"添加组"),
     GROUP_UPDATE(31,"更新组"),
-    GROUP_DELETE(32,"删除组");
+    GROUP_DELETE(32,"删除组"),
+    EMOJI_INSERT(40,"上传图片"),
+    EMOJI_DELETE(41,"删除图片"),
+    USER_DELETE(50,"删除用户");
 
     private final Integer type;
     private final String content;

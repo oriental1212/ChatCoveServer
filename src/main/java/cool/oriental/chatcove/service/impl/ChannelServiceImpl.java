@@ -11,9 +11,7 @@ import cool.oriental.chatcove.mapper.*;
 import cool.oriental.chatcove.service.ChannelService;
 import cool.oriental.chatcove.utils.ChannelIdGenerator;
 import cool.oriental.chatcove.utils.MinioTools;
-import cool.oriental.chatcove.vo.channel.ChannelChildrenInfo;
-import cool.oriental.chatcove.vo.channel.ChannelFontInfo;
-import cool.oriental.chatcove.vo.channel.EnumChannelLog;
+import cool.oriental.chatcove.vo.channel.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +42,8 @@ public class ChannelServiceImpl implements ChannelService {
     private ChannelSettingMapper channelSettingMapper;
     @Resource
     private ChannelUserMapper channelUserMapper;
+    @Resource
+    private UserDetailMapper userDetailMapper;
     @Value("${minio.url}")
     private String minioServerUrl;
 
@@ -58,7 +58,7 @@ public class ChannelServiceImpl implements ChannelService {
         try {
             // 创建主频道
             int insertFlag = channelInfoMapper.insert(
-                    new cool.oriental.chatcove.entity.ChannelInfo()
+                    new ChannelInfo()
                             .setId(channelId)
                             .setMasterId(StpUtil.getLoginIdAsLong())
                             .setAvatar(avatarUrl)
@@ -66,7 +66,18 @@ public class ChannelServiceImpl implements ChannelService {
                             .setCreateTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
                             .setDescription((channelFontInfo.getDescription().isEmpty()) ? channelFontInfo.getDescription() : null)
             );
-            if(insertFlag > 0){
+            // 将频道主添加进频道人员
+            UserDetail userDetail = userDetailMapper.selectOne(new LambdaQueryWrapper<UserDetail>().eq(UserDetail::getUserId, StpUtil.getLoginIdAsLong()));
+            int insertFlag1 = channelUserMapper.insert(
+                    new ChannelUser()
+                            .setChannelId(channelId)
+                            .setUserId(StpUtil.getLoginIdAsLong())
+                            .setUserName(userDetail.getNickName())
+                            .setRoleId(0)
+                            .setCreateTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
+                            .setActiveTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
+            );
+            if(insertFlag > 0 && insertFlag1 > 0){
                 // 添加日志
                 Boolean flag = InsertLog(channelId, EnumChannelLog.CHANNEL_INSERT, "创建新的主频道");
                 if(flag == Boolean.TRUE){
@@ -262,6 +273,203 @@ public class ChannelServiceImpl implements ChannelService {
             e.printStackTrace();
             log.error("删除子频道业务出错");
             return Result.error("服务器异常，删除子频道失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> CreateRole(RoleInfo roleInfo) {
+        ChannelInfo channelInfo = channelInfoMapper.selectById(roleInfo.getChannelId());
+        if(!channelInfo.getMasterId().equals(StpUtil.getLoginIdAsLong())){
+            return Result.error("用户没有权限创建角色");
+        }
+        ChannelRole channelRoleOne = channelRoleMapper.selectOne(
+                new LambdaQueryWrapper<ChannelRole>()
+                        .eq(ChannelRole::getName,roleInfo.getName())
+        );
+        if(channelRoleOne != null){
+            return Result.error("已存在相同名称的角色，请重试");
+        }
+        try {
+            int insertFlag = channelRoleMapper.insert(new ChannelRole()
+                    .setChannelId(roleInfo.getChannelId())
+                    .setName(roleInfo.getName())
+                    .setColor(roleInfo.getColor())
+                    .setAuthority(roleInfo.getAuthority())
+                    .setCreateTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
+            );
+            if(insertFlag>0){
+                InsertLog(roleInfo.getChannelId(), EnumChannelLog.ROLE_INSERT, "创建角色"+roleInfo.getName());
+                return Result.success("角色创建成功");
+            }else{
+                return Result.error("服务器异常，创建角色失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("创建频道角色业务异常");
+            return Result.error("服务器异常，创建角色失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> UpdateRole(RoleInfo roleInfo, Integer roleId) {
+        ChannelRole channelRole = channelRoleMapper.selectById(roleId);
+        if(channelRole == null){
+            return Result.error("不存在该角色，请稍后再试");
+        }
+        // 鉴权后面写
+        try {
+            LambdaUpdateWrapper<ChannelRole> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(ChannelRole::getId, roleId);
+            if(!channelRole.getName().equals(roleInfo.getName())){
+                updateWrapper.set(ChannelRole::getName, roleInfo.getName());
+            }
+            if(!channelRole.getColor().equals(roleInfo.getColor())){
+                updateWrapper.set(ChannelRole::getColor, roleInfo.getColor());
+            }
+            if(!channelRole.getAuthority().equals(roleInfo.getAuthority())){
+                updateWrapper.set(ChannelRole::getAuthority, roleInfo, roleInfo.getAuthority());
+            }
+            int updateFlag = channelRoleMapper.update(null, updateWrapper);
+            if(updateFlag>0){
+                InsertLog(roleInfo.getChannelId(), EnumChannelLog.ROLE_UPDATE, "更新角色信息");
+                return Result.success("跟新角色成功");
+            }else{
+                return Result.error("服务器异常，更新角色失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("更新角色业务异常");
+            return Result.error("服务器异常，更新角色失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> DeleteRole(Integer channelId, Integer roleId) {
+        LambdaQueryWrapper<ChannelRole> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChannelRole::getId, roleId);
+        ChannelRole channelRoleOne = channelRoleMapper.selectOne(queryWrapper);
+        if(channelRoleOne == null){
+            return Result.error("不存在该角色");
+        }
+        // 鉴权
+        try {
+            int deleteFlag = channelRoleMapper.delete(queryWrapper);
+            if(deleteFlag>0){
+                InsertLog(channelId, EnumChannelLog.ROLE_DELETE, "删除角色"+channelRoleOne.getName());
+                return Result.success("删除角色成功");
+            }else {
+                return Result.error("服务器异常，删除角色失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("删除角色业务异常");
+            return Result.error("服务器异常，删除角色失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> UploadEmoji(EmojiInfo emojiInfo) {
+        // 鉴权...
+        Boolean upload = new MinioTools().Upload(emojiInfo.getEmojiFile(), emojiInfo.getChannelId(), MinioEnum.CHANNEL_EMOJI_UPLOAD);
+        if(upload.equals(Boolean.FALSE)){
+            return Result.error("服务器异常，表情上传失败，请稍后重试");
+        }
+        String emojiUrl = minioServerUrl+"/"+"channel"+"/"+emojiInfo.getChannelId()+"/"+emojiInfo.getEmojiFile().getOriginalFilename()+"-"+ DateUtil.thisDayOfMonth();
+        try {
+            int insertFlag = channelEmojiMapper.insert(new ChannelEmoji()
+                    .setChannelId(emojiInfo.getChannelId())
+                    .setName(emojiInfo.getEmojiFile().getOriginalFilename()+"-"+DateUtil.thisDayOfMonth())
+                    .setLink(emojiUrl)
+                    .setUserId(StpUtil.getLoginIdAsLong())
+                    .setCreateTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
+            );
+            if(insertFlag>0){
+                InsertLog(emojiInfo.getChannelId(), EnumChannelLog.EMOJI_INSERT, "上传图片"+emojiInfo.getEmojiFile().getName());
+                return Result.success(emojiUrl);
+            }else {
+                return Result.error("服务器异常，表情上传失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("上传频道表情业务异常");
+            return Result.error("服务器异常，表情上传失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> DeleteEmoji(Integer channelId, Integer emojiId) {
+        // 鉴权。。。
+        LambdaQueryWrapper<ChannelEmoji> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChannelEmoji::getId, emojiId);
+        ChannelEmoji channelEmojiOne = channelEmojiMapper.selectOne(queryWrapper);
+        if(channelEmojiOne == null){
+            return Result.error("不存在该图片");
+        }
+        try {
+            int deleteFlag = channelEmojiMapper.delete(queryWrapper);
+            Boolean emojiDeleteFlag = new MinioTools().Delete(channelId, channelEmojiOne.getName(), MinioEnum.CHANNEL_EMOJI_DELETE);
+            if (deleteFlag>0 && emojiDeleteFlag.equals(Boolean.TRUE)){
+                InsertLog(channelId, EnumChannelLog.EMOJI_DELETE, "删除表情"+channelEmojiOne.getName());
+                return Result.success("表情删除成功");
+            }else{
+                return Result.error("服务器异常，删除表情失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("删除频道表情业务失败");
+            return Result.error("服务器异常，删除表情失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> CreateUser(Integer channelId, String nickName) {
+        ChannelInfo channelInfoOne = channelInfoMapper.selectById(channelId);
+        if(channelInfoOne == null){
+            return Result.error("不存在该频道，请稍后重试");
+        }
+        try {
+            int insertFlag = channelUserMapper.insert(new ChannelUser()
+                    .setChannelId(channelId)
+                    .setUserId(StpUtil.getLoginIdAsLong())
+                    .setUserName(nickName)
+                    .setRoleId(1)
+                    .setCreateTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
+                    .setActiveTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
+            );
+            if(insertFlag>0){
+                return Result.success("加入频道成功");
+            }else{
+                return Result.error("加入频道失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("用户加入频道业务异常");
+            return Result.error("服务器异常，加入频道失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> DeleteUser(Integer channelId, Long userId) {
+        // 鉴权。。。
+        LambdaQueryWrapper<ChannelUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(ChannelUser::getUserId, userId)
+                .eq(ChannelUser::getChannelId, channelId);
+        ChannelUser channelUserOne = channelUserMapper.selectOne(queryWrapper);
+        if(channelUserOne == null){
+            return Result.error("不存在该用户");
+        }
+        try {
+            int deleteFlag = channelUserMapper.delete(queryWrapper);
+            if(deleteFlag>0){
+                return InsertLog(channelId, EnumChannelLog.USER_DELETE, "删除用户"+channelUserOne.getUserName())?Result.success("删除用户成功"):Result.error("服务器异常,删除用户失败，请稍后重试");
+            }else{
+                return Result.error("服务器异常,删除用户失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("删除用户业务异常");
+            return Result.error("服务器异常,删除用户失败，请稍后重试");
         }
     }
 

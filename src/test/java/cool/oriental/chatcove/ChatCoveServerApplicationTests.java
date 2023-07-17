@@ -12,7 +12,7 @@ class ChatCoveServerApplicationTests {
     @Resource
     private RedisTemplate<String, Object> RedisTemplate;
     @Test
-    void contextLoads() throws Exception{
+    void contextLoads(){
         // SnowflakeIdGenerator idGenerator = new SnowflakeIdGenerator(1, 1);
         // for (int i = 0; i < 20; i++) {
         //     long id = idGenerator.nextId();
@@ -22,6 +22,9 @@ class ChatCoveServerApplicationTests {
             String s = ChannelIdGenerator.generateUniqueId();
             System.out.println(s);
         }
+
+        System.out.println("=====================");
+        System.out.println(DateUtil.thisDayOfMonth());
     }
 
 }
