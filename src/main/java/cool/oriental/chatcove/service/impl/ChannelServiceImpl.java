@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import cool.oriental.chatcove.configuration.exception.Result;
 import cool.oriental.chatcove.configuration.minio.MinioEnum;
+import cool.oriental.chatcove.dto.ChannelLogList;
 import cool.oriental.chatcove.entity.*;
 import cool.oriental.chatcove.mapper.*;
 import cool.oriental.chatcove.service.ChannelService;
@@ -16,6 +17,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @Author: Oriental
@@ -49,6 +52,12 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Result<String> CreateMasterChannel(ChannelFontInfo channelFontInfo) {
+        LambdaQueryWrapper<ChannelInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChannelInfo::getName,channelFontInfo.getChannelName());
+        ChannelInfo channelInfoOne = channelInfoMapper.selectOne(queryWrapper);
+        if(channelInfoOne != null){
+            return Result.error("以存在该名称频道，请重试");
+        }
         Integer channelId = Integer.parseInt(ChannelIdGenerator.generateUniqueId());
         Boolean upload = new MinioTools().Upload(channelFontInfo.getAvatar(), channelId, MinioEnum.CHANNEL_AVATAR);
         if(!upload){
@@ -175,9 +184,12 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Result<String> CreateChildrenChannel(ChannelChildrenInfo channelChildrenInfo) {
-        ChannelInfo channelInfo = channelInfoMapper.selectById(channelChildrenInfo.getMasterChannelId());
-        if(!channelInfo.getMasterId().equals(StpUtil.getLoginIdAsLong())){
-            return Result.error("您不是频道主,没有权限更改");
+        String authority = GetUserRole(channelChildrenInfo.getMasterChannelId());
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.CHILDREN_CHANNEL_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有频道管理权限");
         }
         try {
             int insertFlag = channelChildrenMapper.insert(
@@ -206,6 +218,13 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Result<String> UpdateChildrenChannel(ChannelChildrenInfo channelChildrenInfo, Integer childrenChannelId) {
+        String authority = GetUserRole(channelChildrenInfo.getMasterChannelId());
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.CHILDREN_CHANNEL_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有频道管理权限");
+        }
         ChannelChildren channelBasicChildren = channelChildrenMapper.selectOne(
                 new LambdaQueryWrapper<ChannelChildren>()
                         .eq(ChannelChildren::getChannelId, channelChildrenInfo.getMasterChannelId())
@@ -213,9 +232,6 @@ public class ChannelServiceImpl implements ChannelService {
         );
         if(channelBasicChildren == null){
             return Result.error("不存在该子频道");
-        }
-        if(!channelBasicChildren.getUserId().equals(StpUtil.getLoginIdAsLong())){
-            return Result.error("你不是频道主没有权限修改");
         }
         try {
             // 设置更新条件
@@ -252,14 +268,18 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Result<String> DeleteChildrenChannel(Integer channelId, Integer childrenChannelId) {
+        String authority = GetUserRole(channelId);
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.CHILDREN_CHANNEL_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有频道管理权限");
+        }
         LambdaQueryWrapper<ChannelChildren> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChannelChildren::getId, childrenChannelId);
         ChannelChildren channelBasicChildren = channelChildrenMapper.selectOne(queryWrapper);
         if(channelBasicChildren == null){
             return Result.error("不存在该频道");
-        }
-        if(!channelBasicChildren.getUserId().equals(StpUtil.getLoginIdAsLong())){
-            return Result.error("你没有删除该频道的权限");
         }
         try {
             int deleteFlag = channelChildrenMapper.delete(queryWrapper);
@@ -279,6 +299,7 @@ public class ChannelServiceImpl implements ChannelService {
     @Override
     public Result<String> CreateRole(RoleInfo roleInfo) {
         ChannelInfo channelInfo = channelInfoMapper.selectById(roleInfo.getChannelId());
+        // 必须频道主可以创建角色
         if(!channelInfo.getMasterId().equals(StpUtil.getLoginIdAsLong())){
             return Result.error("用户没有权限创建角色");
         }
@@ -312,11 +333,14 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Result<String> UpdateRole(RoleInfo roleInfo, Integer roleId) {
+        ChannelInfo channelInfo = channelInfoMapper.selectById(roleInfo.getChannelId());
+        if(!channelInfo.getMasterId().equals(StpUtil.getLoginIdAsLong())){
+            return Result.error("用户没有权限创建角色");
+        }
         ChannelRole channelRole = channelRoleMapper.selectById(roleId);
         if(channelRole == null){
             return Result.error("不存在该角色，请稍后再试");
         }
-        // 鉴权后面写
         try {
             LambdaUpdateWrapper<ChannelRole> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(ChannelRole::getId, roleId);
@@ -345,13 +369,16 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Result<String> DeleteRole(Integer channelId, Integer roleId) {
+        ChannelInfo channelInfo = channelInfoMapper.selectById(channelId);
+        if(!channelInfo.getMasterId().equals(StpUtil.getLoginIdAsLong())){
+            return Result.error("用户没有权限删除角色");
+        }
         LambdaQueryWrapper<ChannelRole> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChannelRole::getId, roleId);
         ChannelRole channelRoleOne = channelRoleMapper.selectOne(queryWrapper);
         if(channelRoleOne == null){
             return Result.error("不存在该角色");
         }
-        // 鉴权
         try {
             int deleteFlag = channelRoleMapper.delete(queryWrapper);
             if(deleteFlag>0){
@@ -369,7 +396,13 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Result<String> UploadEmoji(EmojiInfo emojiInfo) {
-        // 鉴权...
+        String authority = GetUserRole(emojiInfo.getChannelId());
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.EMOJI_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有表情管理权限");
+        }
         Boolean upload = new MinioTools().Upload(emojiInfo.getEmojiFile(), emojiInfo.getChannelId(), MinioEnum.CHANNEL_EMOJI_UPLOAD);
         if(upload.equals(Boolean.FALSE)){
             return Result.error("服务器异常，表情上传失败，请稍后重试");
@@ -398,7 +431,13 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Result<String> DeleteEmoji(Integer channelId, Integer emojiId) {
-        // 鉴权。。。
+        String authority = GetUserRole(channelId);
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.EMOJI_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有表情管理权限");
+        }
         LambdaQueryWrapper<ChannelEmoji> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChannelEmoji::getId, emojiId);
         ChannelEmoji channelEmojiOne = channelEmojiMapper.selectOne(queryWrapper);
@@ -449,8 +488,46 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
     @Override
+    public Result<String> ChangeUserName(Integer channelId, String remarkNickName) {
+        LambdaQueryWrapper<ChannelUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(ChannelUser::getChannelId, channelId)
+                .eq(ChannelUser::getUserId, StpUtil.getLoginIdAsLong());
+        ChannelUser channelUserOne = channelUserMapper.selectOne(queryWrapper);
+        if(channelUserOne == null){
+            return Result.error("频道不存在用户");
+        }else{
+            try {
+                int updateFlag = channelUserMapper.update(
+                        null,
+                        new LambdaUpdateWrapper<ChannelUser>()
+                                .eq(ChannelUser::getChannelId, channelId)
+                                .eq(ChannelUser::getUserId, StpUtil.getLoginIdAsLong())
+                                .set(ChannelUser::getUserName, remarkNickName)
+                );
+                if(updateFlag>0){
+                    return Result.success("更改昵称成功");
+                }else{
+                    return Result.error("更改昵称失败");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("更改用户昵称业务异常");
+                return Result.error("服务器异常，更改昵称失败，请稍后重试");
+            }
+        }
+    }
+
+    @Override
     public Result<String> DeleteUser(Integer channelId, Long userId) {
         // 鉴权。。。
+        String authority = GetUserRole(channelId);
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.DELETE_USER_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有删除用户权限");
+        }
         LambdaQueryWrapper<ChannelUser> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
                 .eq(ChannelUser::getUserId, userId)
@@ -473,6 +550,57 @@ public class ChannelServiceImpl implements ChannelService {
         }
     }
 
+    @Override
+    public Result<String> ExitChannel(Integer channelId) {
+        LambdaQueryWrapper<ChannelUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(ChannelUser::getChannelId, channelId)
+                .eq(ChannelUser::getUserId, StpUtil.getLoginIdAsLong());
+        ChannelUser channelUserOne = channelUserMapper.selectOne(queryWrapper);
+        if(channelUserOne == null){
+            return Result.error("未加入该频道，无法退出");
+        }
+        try {
+            int deleteFlag = channelUserMapper.delete(queryWrapper);
+            if(deleteFlag>0){
+                return Result.success("退出频道成功");
+            }else{
+                return Result.error("服务器异常，推出频道失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("用户推出频道业务异常");
+            return Result.error("服务器异常，推出频道失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<List<ChannelLogList>> GetChannelLog(Integer channelId) {
+        String authority = GetUserRole(channelId);
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.REVIEW_LOG.getType()) || authority.contains("0"))){
+            return Result.error("未拥有查看日志权限");
+        }
+        try {
+            LambdaQueryWrapper<ChannelLogs> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ChannelLogs::getChannelId,channelId);
+            ChannelLogs channelLogsOne = channelLogsMapper.selectOne(queryWrapper);
+            if(channelLogsOne == null){
+                return Result.error("不存在该频道的日志，请稍后再试");
+            }
+            List<ChannelLogList> channelLogLists = channelLogsMapper.GetChannelLog(channelId);
+            return Result.success(channelLogLists);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("查询频道日志业务异常");
+            return Result.error("服务器异常，查询频道日志失败，请稍后重试");
+        }
+
+    }
+
+    // 添加日志
     private Boolean InsertLog(Integer channelId, EnumChannelLog enumChannelLog, String content){
         try {
             channelLogsMapper.insert(
@@ -489,5 +617,32 @@ public class ChannelServiceImpl implements ChannelService {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
+    }
+
+    // 获取用户角色权限
+    private String GetUserRole(Integer channelId){
+        LambdaQueryWrapper<ChannelUser> queryWrapperUser = new LambdaQueryWrapper<>();
+        queryWrapperUser
+                .eq(ChannelUser::getChannelId,channelId)
+                .eq(ChannelUser::getUserId,StpUtil.getLoginIdAsLong());
+        try {
+            ChannelUser channelUserOne = channelUserMapper.selectOne(queryWrapperUser);
+            if(channelUserOne == null){
+                return null;
+            }
+            ChannelRole channelRoleOne = channelRoleMapper.selectOne(
+                    new LambdaQueryWrapper<ChannelRole>()
+                            .eq(ChannelRole::getId, channelUserOne.getRoleId()
+                    )
+            );
+            if(channelRoleOne == null){
+                return null;
+            }
+            return channelRoleOne.getAuthority();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取用户权限业务异常");
+            return null;
+        }
     }
 }

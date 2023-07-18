@@ -2,4 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cool.oriental.chatcove.mapper.ChannelLogsMapper">
 
+    <resultMap id="channelLogListMap" type="cool.oriental.chatcove.dto.ChannelLogList">
+        <result property="userName" column="nick_name"/>
+        <result property="avatarUrl" column="avatar"/>
+        <result property="logType" column="type"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="GetChannelLog" resultMap="channelLogListMap">
+        SELECT ud.nick_name, ud.avatar, cl.type, cl.content, cl.create_time
+        FROM user_detail ud
+        INNER JOIN channel_logs cl ON ud.user_id = cl.userid
+        WHERE cl.channel_id = #{channelId}
+        ORDER BY cl.create_time DESC
+    </select>
+
 </mapper>

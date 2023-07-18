@@ -1,10 +1,13 @@
 package cool.oriental.chatcove.service;
 
 import cool.oriental.chatcove.configuration.exception.Result;
+import cool.oriental.chatcove.dto.ChannelLogList;
 import cool.oriental.chatcove.vo.channel.ChannelChildrenInfo;
 import cool.oriental.chatcove.vo.channel.ChannelFontInfo;
 import cool.oriental.chatcove.vo.channel.EmojiInfo;
 import cool.oriental.chatcove.vo.channel.RoleInfo;
+
+import java.util.List;
 
 /**
  * @Author: Oriental
@@ -24,5 +27,8 @@ public interface ChannelService {
     Result<String> UploadEmoji(EmojiInfo emojiInfo);
     Result<String> DeleteEmoji(Integer channelId, Integer emojiId);
     Result<String> CreateUser(Integer channelId, String nickName);
+    Result<String> ChangeUserName(Integer channelId, String remarkNickName);
     Result<String> DeleteUser(Integer channelId, Long userId);
+    Result<String> ExitChannel(Integer channelId);
+    Result<List<ChannelLogList>> GetChannelLog(Integer channelId);
 }

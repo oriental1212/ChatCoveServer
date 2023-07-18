@@ -1,4 +1,4 @@
-package cool.oriental.chatcove.vo.channel;
+package cool.oriental.chatcove.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

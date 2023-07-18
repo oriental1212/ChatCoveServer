@@ -1,6 +1,7 @@
 package cool.oriental.chatcove.controller;
 
 import cool.oriental.chatcove.configuration.exception.Result;
+import cool.oriental.chatcove.dto.ChannelLogList;
 import cool.oriental.chatcove.service.ChannelService;
 import cool.oriental.chatcove.vo.channel.ChannelChildrenInfo;
 import cool.oriental.chatcove.vo.channel.ChannelFontInfo;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author: Oriental
@@ -142,6 +145,15 @@ public class ChannelController {
         return channelService.CreateUser(channelId, nickName);
     }
 
+    @PostMapping("/changeUserName")
+    @Operation(summary = "改变用户频道昵称")
+    public Result<String> ChangeUserName(
+            @RequestParam @Parameter(description = "频道id") Integer channelId,
+            @RequestParam @Parameter(description = "用户修改昵称") String remarkNickName
+    ){
+        return channelService.ChangeUserName(channelId, remarkNickName);
+    }
+
     @PostMapping("/deleteUser")
     @Operation(summary = "删除频道人员")
     public Result<String> DeleteUser(
@@ -149,5 +161,21 @@ public class ChannelController {
             @RequestParam @Parameter(description = "用户id") Long userId
     ){
         return channelService.DeleteUser(channelId, userId);
+    }
+
+    @PostMapping("/exitChannel")
+    @Operation(summary = "用户主动推出频道接口")
+    public Result<String> ExitChannel(
+            @RequestParam @Parameter(description = "频道id") Integer channelId
+    ){
+        return channelService.ExitChannel(channelId);
+    }
+
+    @GetMapping("/getChannelLog")
+    @Operation(summary = "获取频道日志接口")
+    public Result<List<ChannelLogList>> GetChannelLog(
+            @RequestParam @Parameter(description = "频道id") Integer channelId
+    ){
+        return channelService.GetChannelLog(channelId);
     }
 }

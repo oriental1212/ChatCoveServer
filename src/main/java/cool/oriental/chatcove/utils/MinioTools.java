@@ -123,6 +123,20 @@ public class MinioTools {
     }
 
     private Boolean ChannelEmojiDelete(Integer channelId, String emojiName){
-        return Boolean.TRUE;
+        String objectName = channelId+"/"+emojiName;
+        try{
+            minioConfiguration.MinioCreator().removeObject(
+                    RemoveObjectArgs
+                            .builder()
+                            .bucket("channel")
+                            .object(objectName)
+                            .build()
+            );
+            return Boolean.TRUE;
+        }catch(Exception e){
+            e.printStackTrace();
+            log.error("删除文件工具类异常，频道表情删除失败");
+            return Boolean.FALSE;
+        }
     }
 }
