@@ -1,6 +1,7 @@
 package cool.oriental.chatcove.controller;
 
 import cool.oriental.chatcove.configuration.exception.Result;
+import cool.oriental.chatcove.dto.ChannelByUserList;
 import cool.oriental.chatcove.dto.ChannelLogList;
 import cool.oriental.chatcove.service.ChannelService;
 import cool.oriental.chatcove.vo.channel.ChannelChildrenInfo;
@@ -164,7 +165,7 @@ public class ChannelController {
     }
 
     @PostMapping("/exitChannel")
-    @Operation(summary = "用户主动推出频道接口")
+    @Operation(summary = "用户主动退出频道接口")
     public Result<String> ExitChannel(
             @RequestParam @Parameter(description = "频道id") Integer channelId
     ){
@@ -178,4 +179,57 @@ public class ChannelController {
     ){
         return channelService.GetChannelLog(channelId);
     }
+
+    @PostMapping("/createGroup")
+    @Operation(summary = "创建频道分组")
+    public Result<String> CreateGroup(
+            @RequestParam @Parameter(description = "频道id") Integer channelId,
+            @RequestParam @Parameter(description = "分组名称") String groupName
+    ){
+        return channelService.CreateGroup(channelId, groupName);
+    }
+
+    @PostMapping("/updateGroup")
+    @Operation(summary = "更新频道分组")
+    public Result<String> updateGroup(
+            @RequestParam @Parameter(description = "频道id") Integer channelId,
+            @RequestParam @Parameter(description = "分组id") Integer groupId,
+            @RequestParam @Parameter(description = "分组更新名称") String remarkGroupName
+    ){
+        return channelService.updateGroup(channelId, groupId, remarkGroupName);
+    }
+
+    @PostMapping("/deleteGroup")
+    @Operation(summary = "删除频道分组")
+    public Result<String> DeleteGroup(
+            @RequestParam @Parameter(description = "频道id") Integer channelId,
+            @RequestParam @Parameter(description = "分组id") Integer groupId
+    ){
+        return channelService.DeleteGroup(channelId, groupId);
+    }
+
+    @PostMapping("/changeChannelSetting")
+    @Operation(summary = "更改频道设置")
+    public Result<String> ChangeChannelSetting(
+            @RequestParam @Parameter(description = "频道id") Integer channelId,
+            @RequestParam @Parameter(description = "设置类型") Integer type
+    ){
+        return channelService.ChangeChannelSetting(channelId, type);
+    }
+
+    @GetMapping("/getChannelList")
+    @Operation(summary = "获取用户频道列表")
+    public Result<List<ChannelByUserList>> GetChannelList()
+    {
+        return channelService.GetChannelList();
+    }
+
+    @GetMapping("/getChannelInfo")
+    @Operation(summary = "获取频道信息")
+    public Result<String> GetChannelInfo(
+            @RequestParam @Parameter(description = "频道id") Integer chanelId
+    ){
+        return channelService.GetChannelInfo(chanelId);
+    }
+
 }

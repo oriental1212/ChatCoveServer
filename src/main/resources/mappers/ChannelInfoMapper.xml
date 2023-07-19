@@ -2,4 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cool.oriental.chatcove.mapper.ChannelInfoMapper">
 
+    <resultMap id="getChannelListMap" type="cool.oriental.chatcove.dto.ChannelByUserList">
+        <result property="channelId" column="id" />
+        <result property="channelName" column="name" />
+        <result property="channelAvatar" column="avatar" />
+    </resultMap>
+
+    <select id="GetChannelList" resultMap="getChannelListMap">
+        SELECT ci.id, ci.name, ci.avatar
+        FROM channel_info ci
+        INNER JOIN channel_user cu ON ci.id = cu.channel_id
+        where cu.user_id = #{userId}
+    </select>
+
 </mapper>

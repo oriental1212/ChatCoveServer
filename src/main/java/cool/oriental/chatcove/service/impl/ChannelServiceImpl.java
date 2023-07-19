@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import cool.oriental.chatcove.configuration.exception.Result;
 import cool.oriental.chatcove.configuration.minio.MinioEnum;
+import cool.oriental.chatcove.dto.ChannelByUserList;
 import cool.oriental.chatcove.dto.ChannelLogList;
 import cool.oriental.chatcove.entity.*;
 import cool.oriental.chatcove.mapper.*;
@@ -598,6 +599,176 @@ public class ChannelServiceImpl implements ChannelService {
             return Result.error("服务器异常，查询频道日志失败，请稍后重试");
         }
 
+    }
+
+    @Override
+    public Result<String> CreateGroup(Integer channelId, String groupName) {
+        String authority = GetUserRole(channelId);
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.GROUP_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有分组管理权限");
+        }
+        LambdaQueryWrapper<ChannelGroup> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(ChannelGroup::getChannelId, channelId)
+                .eq(ChannelGroup::getName, groupName);
+        ChannelGroup channelGroupOne = channelGroupMapper.selectOne(queryWrapper);
+        if(channelGroupOne != null){
+            return Result.error("以存在相同名称分组，创建失败");
+        }
+        try {
+            int insertFlag = channelGroupMapper.insert(new ChannelGroup()
+                    .setChannelId(channelId)
+                    .setName(groupName)
+                    .setUserId(StpUtil.getLoginIdAsLong())
+                    .setCreateTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
+            );
+            if(insertFlag>0){
+                InsertLog(channelId, EnumChannelLog.GROUP_INSERT, "创建分组"+groupName);
+                return Result.success("分组创建成功");
+            }else{
+                return Result.error("服务器异常，分组创建失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("创建分组业务异常");
+            return Result.error("服务器异常，分组创建失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> updateGroup(Integer channelId, Integer groupId, String remarkGroupName) {
+        String authority = GetUserRole(channelId);
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.GROUP_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有分组管理权限");
+        }
+        LambdaQueryWrapper<ChannelGroup> queryWrapperFirst = new LambdaQueryWrapper<>();
+        queryWrapperFirst.eq(ChannelGroup::getId, groupId);
+        ChannelGroup channelGroupOne = channelGroupMapper.selectOne(queryWrapperFirst);
+        if(channelGroupOne == null){
+            return Result.error("不存在该分组，请稍后重试");
+        }
+        LambdaQueryWrapper<ChannelGroup> queryWrapperSecond = new LambdaQueryWrapper<>();
+        queryWrapperSecond
+                .eq(ChannelGroup::getChannelId, channelId)
+                .eq(ChannelGroup::getName, remarkGroupName);
+        ChannelGroup channelGroupTwo = channelGroupMapper.selectOne(queryWrapperSecond);
+        if(channelGroupTwo != null){
+            return Result.error("已存在相同名称分组");
+        }
+        try {
+            LambdaUpdateWrapper<ChannelGroup> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper
+                    .eq(ChannelGroup::getId, groupId)
+                    .set(ChannelGroup::getName, remarkGroupName);
+            int updateFlag = channelGroupMapper.update(null, updateWrapper);
+            if(updateFlag>0){
+                InsertLog(channelId, EnumChannelLog.GROUP_UPDATE, "更新分组 "+channelGroupOne.getName()+" 为 "+remarkGroupName);
+                return Result.success("更新分组名称成功");
+            }else {
+                return Result.error("服务器异常，更新名称失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("更新分组业务异常");
+            return Result.error("服务器异常，更新名称失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> DeleteGroup(Integer channelId, Integer groupId) {
+        String authority = GetUserRole(channelId);
+        if(authority == null){
+            return Result.error("权限异常，稍后再试");
+        }
+        if(!(authority.contains(EnumRole.GROUP_CONTROLLER.getType()) || authority.contains("0"))){
+            return Result.error("未拥有分组管理权限");
+        }
+        LambdaQueryWrapper<ChannelGroup> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChannelGroup::getId, groupId);
+        ChannelGroup channelGroupOne = channelGroupMapper.selectOne(queryWrapper);
+        if(channelGroupOne == null){
+            return Result.error("不存在该频道，删除失败");
+        }
+        try {
+            int deleteFlag = channelGroupMapper.delete(queryWrapper);
+            if(deleteFlag>0){
+                LambdaUpdateWrapper<ChannelChildren> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper
+                        .eq(ChannelChildren::getChannelId, channelId)
+                        .eq(ChannelChildren::getGroupId, groupId)
+                        .set(ChannelChildren::getGroupId, 0);
+                int updateFlag = channelChildrenMapper.update(null, updateWrapper);
+                if(updateFlag>0){
+                    InsertLog(channelId, EnumChannelLog.GROUP_DELETE, "删除分组"+channelGroupOne.getName());
+                    return Result.success("删除成功");
+                }else {
+                    return Result.error("服务器异常，删除分组失败，请稍后重试");
+                }
+            }else {
+                return Result.error("服务器异常，删除分组失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("删除分组业务异常");
+            return Result.error("服务器异常，删除分组失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<String> ChangeChannelSetting(Integer channelId, Integer type) {
+        LambdaQueryWrapper<ChannelSetting> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(ChannelSetting::getChannelId, channelId)
+                .eq(ChannelSetting::getUserId, StpUtil.getLoginIdAsLong())
+                .eq(ChannelSetting::getType, type);
+        ChannelSetting queryResult = channelSettingMapper.selectOne(queryWrapper);
+        try {
+            if(queryResult == null){
+                int insertFlag = channelSettingMapper.insert(new ChannelSetting()
+                        .setChannelId(channelId)
+                        .setUserId(StpUtil.getLoginIdAsLong())
+                        .setType(type)
+                );
+                return insertFlag>0 ? Result.success("设置成功") : Result.error("服务器异常，设置失败，请稍后重试");
+            }else{
+                int deleteFlag = channelSettingMapper.delete(queryWrapper);
+                return deleteFlag>0 ? Result.success("设置成功") : Result.error("服务器异常，设置失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("更改设置业务异常");
+            return Result.error("服务器异常，设置失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<List<ChannelByUserList>> GetChannelList() {
+        LambdaQueryWrapper<ChannelUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChannelUser::getUserId, StpUtil.getLoginIdAsLong());
+        List<ChannelUser> channelUserList = channelUserMapper.selectList(queryWrapper);
+        if(channelUserList == null){
+            return Result.success(null);
+        }else{
+            try {
+                List<ChannelByUserList> resultList = channelInfoMapper.GetChannelList(StpUtil.getLoginIdAsLong());
+                return Result.success(resultList);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("查询用户频道列表业务异常");
+                return Result.error("服务器异常，查询频道失败，请稍后重试");
+            }
+        }
+    }
+
+    @Override
+    public Result<String> GetChannelInfo(Integer chanelId) {
+        return null;
     }
 
     // 添加日志

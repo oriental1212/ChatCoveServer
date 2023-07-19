@@ -1,6 +1,7 @@
 package cool.oriental.chatcove.service;
 
 import cool.oriental.chatcove.configuration.exception.Result;
+import cool.oriental.chatcove.dto.ChannelByUserList;
 import cool.oriental.chatcove.dto.ChannelLogList;
 import cool.oriental.chatcove.vo.channel.ChannelChildrenInfo;
 import cool.oriental.chatcove.vo.channel.ChannelFontInfo;
@@ -31,4 +32,10 @@ public interface ChannelService {
     Result<String> DeleteUser(Integer channelId, Long userId);
     Result<String> ExitChannel(Integer channelId);
     Result<List<ChannelLogList>> GetChannelLog(Integer channelId);
+    Result<String> CreateGroup(Integer channelId, String groupName);
+    Result<String> updateGroup(Integer channelId, Integer groupId, String remarkGroupName);
+    Result<String> DeleteGroup(Integer channelId, Integer groupId);
+    Result<String> ChangeChannelSetting(Integer channelId, Integer type);
+    Result<List<ChannelByUserList>> GetChannelList();
+    Result<String> GetChannelInfo(Integer chanelId);
 }
