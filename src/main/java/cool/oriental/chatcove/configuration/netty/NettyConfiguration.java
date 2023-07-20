@@ -35,6 +35,4 @@ public class NettyConfiguration {
         return onlineUserChannelMap;
     }
 
-    public static void main(String[] args) {
-    }
 }

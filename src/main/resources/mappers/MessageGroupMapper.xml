@@ -2,4 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cool.oriental.chatcove.mapper.MessageGroupMapper">
 
+    <resultMap id="getChannelMessageMap" type="cool.oriental.chatcove.dto.ChannelMessage">
+        <result property="messageId" column="id"/>
+        <result property="senderName" column="user_name"/>
+        <result property="senderAvatar" column="avatar"/>
+        <result property="replyId" column="reply_id"/>
+        <result property="messageType" column="type"/>
+        <result property="messageContent" column="content"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="GetChannelMessage" resultMap="getChannelMessageMap">
+        SELECT ud.avatar, cu.user_name, mg.id, mg.type, mg.content, mg.reply_id, mg.create_time
+        FROM user_detail ud
+        INNER JOIN channel_user cu ON ud.user_id = cu.user_id
+        INNER JOIN message_group mg ON ud.user_id = mg.sender_id
+        WHERE mg.channel_id = #{channelChildrenId} AND cu.channel_id = #{channelId}
+        ORDER BY mg.create_time DESC
+        LIMIT 50
+    </select>
+
 </mapper>

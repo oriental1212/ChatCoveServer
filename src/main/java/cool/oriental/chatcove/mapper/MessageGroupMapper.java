@@ -1,7 +1,10 @@
 package cool.oriental.chatcove.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import cool.oriental.chatcove.dto.ChannelMessage;
 import cool.oriental.chatcove.entity.MessageGroup;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,5 +15,5 @@ import cool.oriental.chatcove.entity.MessageGroup;
  * @since 2023-06-25 01:23:32
  */
 public interface MessageGroupMapper extends BaseMapper<MessageGroup> {
-
+    List<ChannelMessage> GetChannelMessage(Integer channelId, Integer channelChildrenId);
 }

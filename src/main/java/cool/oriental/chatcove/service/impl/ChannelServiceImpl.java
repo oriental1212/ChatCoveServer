@@ -6,19 +6,22 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import cool.oriental.chatcove.configuration.exception.Result;
 import cool.oriental.chatcove.configuration.minio.MinioEnum;
-import cool.oriental.chatcove.dto.ChannelByUserList;
-import cool.oriental.chatcove.dto.ChannelLogList;
+import cool.oriental.chatcove.dto.*;
 import cool.oriental.chatcove.entity.*;
 import cool.oriental.chatcove.mapper.*;
 import cool.oriental.chatcove.service.ChannelService;
 import cool.oriental.chatcove.utils.ChannelIdGenerator;
 import cool.oriental.chatcove.utils.MinioTools;
-import cool.oriental.chatcove.vo.channel.*;
+import cool.oriental.chatcove.vo.channel.ChannelChildrenInfo;
+import cool.oriental.chatcove.vo.channel.ChannelFontInfo;
+import cool.oriental.chatcove.vo.channel.EmojiInfo;
+import cool.oriental.chatcove.vo.channel.RoleInfo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,6 +49,8 @@ public class ChannelServiceImpl implements ChannelService {
     private ChannelSettingMapper channelSettingMapper;
     @Resource
     private ChannelUserMapper channelUserMapper;
+    @Resource
+    private MessageGroupMapper messageGroupMapper;
     @Resource
     private UserDetailMapper userDetailMapper;
     @Value("${minio.url}")
@@ -767,8 +772,62 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
     @Override
-    public Result<String> GetChannelInfo(Integer chanelId) {
-        return null;
+    public Result<List<GroupChannelList>> GetChildrenChannelList(Integer chanelId) {
+        LambdaQueryWrapper<ChannelChildren> queryWrapperChildren = new LambdaQueryWrapper<>();
+        queryWrapperChildren.eq(ChannelChildren::getChannelId, chanelId);
+        List<ChannelChildren> channelChildrenList = channelChildrenMapper.selectList(queryWrapperChildren);
+        LambdaQueryWrapper<ChannelGroup> queryWrapperGroup = new LambdaQueryWrapper<>();
+        queryWrapperGroup.eq(ChannelGroup::getChannelId, chanelId);
+        List<ChannelGroup> channelGroupsList = channelGroupMapper.selectList(queryWrapperGroup);
+        // 转化返回类
+        try {
+            List<GroupChannelList> resultList = new ArrayList<>();
+            for (ChannelGroup channelGroup : channelGroupsList) {
+                GroupChannelList groupChannelList = new GroupChannelList();
+                groupChannelList.setGroupId(channelGroup.getId());
+                groupChannelList.setGroupName(channelGroup.getName());
+                List<ChildrenChannelList> childrenChannelList = new ArrayList<>();
+                for (ChannelChildren channelChildren : channelChildrenList) {
+                    if(channelChildren.getGroupId().equals(channelGroup.getId())){
+                        ChildrenChannelList item = new ChildrenChannelList();
+                        item.setChildrenChannelId(channelChildren.getId());
+                        item.setChildrenChannelName(channelChildren.getName());
+                        item.setChildrenChannelDescription(channelChildren.getDescription());
+                        item.setChildrenChannelType(channelChildren.getType());
+                        item.setChildrenChannelSecret(channelChildren.getSecret());
+                        childrenChannelList.add(item);
+                    }
+                }
+                groupChannelList.setChildrenChannelList(childrenChannelList);
+                resultList.add(groupChannelList);
+            }
+            return Result.success(resultList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取子频道业务异常");
+            return Result.error("服务器异常，获取子频道失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public Result<List<ChannelMessage>> GetChildrenChannelMessage(Integer channelId, Integer childrenChannelId) {
+        LambdaQueryWrapper<ChannelChildren> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChannelChildren::getId, childrenChannelId);
+        ChannelChildren channelChildrenOne = channelChildrenMapper.selectOne(queryWrapper);
+        if(channelChildrenOne == null){
+            return Result.error("该频道不存在，请稍后再试");
+        } else if (!channelChildrenOne.getType().equals(0)) {
+            return Result.error("该频道不是文字频道");
+        }
+        List<ChannelMessage> channelMessageList = null;
+        try {
+            channelMessageList = messageGroupMapper.GetChannelMessage(channelId, childrenChannelId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("获取子频道消息业务异常");
+            return Result.error("服务器异常，查询频道消息失败，请稍后重试");
+        }
+        return Result.success(channelMessageList);
     }
 
     // 添加日志

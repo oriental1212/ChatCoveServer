@@ -3,6 +3,8 @@ package cool.oriental.chatcove.controller;
 import cool.oriental.chatcove.configuration.exception.Result;
 import cool.oriental.chatcove.dto.ChannelByUserList;
 import cool.oriental.chatcove.dto.ChannelLogList;
+import cool.oriental.chatcove.dto.ChannelMessage;
+import cool.oriental.chatcove.dto.GroupChannelList;
 import cool.oriental.chatcove.service.ChannelService;
 import cool.oriental.chatcove.vo.channel.ChannelChildrenInfo;
 import cool.oriental.chatcove.vo.channel.ChannelFontInfo;
@@ -224,12 +226,21 @@ public class ChannelController {
         return channelService.GetChannelList();
     }
 
-    @GetMapping("/getChannelInfo")
-    @Operation(summary = "获取频道信息")
-    public Result<String> GetChannelInfo(
+    @GetMapping("/getChildrenChannelList")
+    @Operation(summary = "获取子频道列表")
+    public Result<List<GroupChannelList>> GetChildrenChannelList(
             @RequestParam @Parameter(description = "频道id") Integer chanelId
     ){
-        return channelService.GetChannelInfo(chanelId);
+        return channelService.GetChildrenChannelList(chanelId);
+    }
+
+    @GetMapping("/getChildrenChannelInfo")
+    @Operation(summary = "获取子频道聊天信息")
+    public Result<List<ChannelMessage>> GetChildrenChannelMessage(
+            @RequestParam @Parameter(description = "频道id") Integer channelId,
+            @RequestParam @Parameter(description = "子频道id") Integer childrenChannelId
+    ){
+        return channelService.GetChildrenChannelMessage(channelId ,childrenChannelId);
     }
 
 }
