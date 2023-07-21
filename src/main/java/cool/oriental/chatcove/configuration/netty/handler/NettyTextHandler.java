@@ -43,6 +43,7 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
     }
 
+
     /**
      * 在 WebSocket 连接断开时，Netty 会自动触发 channelInactive 事件，并将该事件交给事件处理器进行处理。
      * 在 channelInactive 事件的处理过程中，会调用 handlerRemoved 方法，用于进行一些资源释放等操作，确保 WebSocket 连接正常断开。

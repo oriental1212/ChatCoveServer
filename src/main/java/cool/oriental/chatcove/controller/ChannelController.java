@@ -142,8 +142,8 @@ public class ChannelController {
     @PostMapping("/createUser")
     @Operation(summary = "新增频道人员")
     public Result<String> CreateUser(
-            @RequestParam @Parameter(description = "频道id") Integer channelId,
-            @RequestParam @Parameter(description = "用户昵称") String nickName
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
+            @RequestParam(value = "nickName") @Parameter(description = "用户昵称") String nickName
     ){
         return channelService.CreateUser(channelId, nickName);
     }
@@ -151,8 +151,8 @@ public class ChannelController {
     @PostMapping("/changeUserName")
     @Operation(summary = "改变用户频道昵称")
     public Result<String> ChangeUserName(
-            @RequestParam @Parameter(description = "频道id") Integer channelId,
-            @RequestParam @Parameter(description = "用户修改昵称") String remarkNickName
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
+            @RequestParam(value = "remarkNickName") @Parameter(description = "用户修改昵称") String remarkNickName
     ){
         return channelService.ChangeUserName(channelId, remarkNickName);
     }
@@ -160,8 +160,8 @@ public class ChannelController {
     @PostMapping("/deleteUser")
     @Operation(summary = "删除频道人员")
     public Result<String> DeleteUser(
-            @RequestParam @Parameter(description = "频道id") Integer channelId,
-            @RequestParam @Parameter(description = "用户id") Long userId
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
+            @RequestParam(value = "userId") @Parameter(description = "用户id") Long userId
     ){
         return channelService.DeleteUser(channelId, userId);
     }
@@ -169,7 +169,7 @@ public class ChannelController {
     @PostMapping("/exitChannel")
     @Operation(summary = "用户主动退出频道接口")
     public Result<String> ExitChannel(
-            @RequestParam @Parameter(description = "频道id") Integer channelId
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId
     ){
         return channelService.ExitChannel(channelId);
     }
@@ -177,7 +177,7 @@ public class ChannelController {
     @GetMapping("/getChannelLog")
     @Operation(summary = "获取频道日志接口")
     public Result<List<ChannelLogList>> GetChannelLog(
-            @RequestParam @Parameter(description = "频道id") Integer channelId
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId
     ){
         return channelService.GetChannelLog(channelId);
     }
@@ -185,8 +185,8 @@ public class ChannelController {
     @PostMapping("/createGroup")
     @Operation(summary = "创建频道分组")
     public Result<String> CreateGroup(
-            @RequestParam @Parameter(description = "频道id") Integer channelId,
-            @RequestParam @Parameter(description = "分组名称") String groupName
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
+            @RequestParam(value = "groupName") @Parameter(description = "分组名称") String groupName
     ){
         return channelService.CreateGroup(channelId, groupName);
     }
@@ -194,9 +194,9 @@ public class ChannelController {
     @PostMapping("/updateGroup")
     @Operation(summary = "更新频道分组")
     public Result<String> updateGroup(
-            @RequestParam @Parameter(description = "频道id") Integer channelId,
-            @RequestParam @Parameter(description = "分组id") Integer groupId,
-            @RequestParam @Parameter(description = "分组更新名称") String remarkGroupName
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
+            @RequestParam(value = "groupId") @Parameter(description = "分组id") Integer groupId,
+            @RequestParam(value = "remarkGroupName") @Parameter(description = "分组更新名称") String remarkGroupName
     ){
         return channelService.updateGroup(channelId, groupId, remarkGroupName);
     }
@@ -204,8 +204,8 @@ public class ChannelController {
     @PostMapping("/deleteGroup")
     @Operation(summary = "删除频道分组")
     public Result<String> DeleteGroup(
-            @RequestParam @Parameter(description = "频道id") Integer channelId,
-            @RequestParam @Parameter(description = "分组id") Integer groupId
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
+            @RequestParam(value = "groupId") @Parameter(description = "分组id") Integer groupId
     ){
         return channelService.DeleteGroup(channelId, groupId);
     }
@@ -213,8 +213,8 @@ public class ChannelController {
     @PostMapping("/changeChannelSetting")
     @Operation(summary = "更改频道设置")
     public Result<String> ChangeChannelSetting(
-            @RequestParam @Parameter(description = "频道id") Integer channelId,
-            @RequestParam @Parameter(description = "设置类型") Integer type
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
+            @RequestParam(value = "type") @Parameter(description = "设置类型") Integer type
     ){
         return channelService.ChangeChannelSetting(channelId, type);
     }
@@ -229,7 +229,7 @@ public class ChannelController {
     @GetMapping("/getChildrenChannelList")
     @Operation(summary = "获取子频道列表")
     public Result<List<GroupChannelList>> GetChildrenChannelList(
-            @RequestParam @Parameter(description = "频道id") Integer chanelId
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer chanelId
     ){
         return channelService.GetChildrenChannelList(chanelId);
     }
@@ -237,8 +237,8 @@ public class ChannelController {
     @GetMapping("/getChildrenChannelInfo")
     @Operation(summary = "获取子频道聊天信息")
     public Result<List<ChannelMessage>> GetChildrenChannelMessage(
-            @RequestParam @Parameter(description = "频道id") Integer channelId,
-            @RequestParam @Parameter(description = "子频道id") Integer childrenChannelId
+            @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
+            @RequestParam(value = "childrenChannelId") @Parameter(description = "子频道id") Integer childrenChannelId
     ){
         return channelService.GetChildrenChannelMessage(channelId ,childrenChannelId);
     }
