@@ -33,7 +33,7 @@ public class NettyServerInitializer extends ChannelInitializer<NioSocketChannel>
         //用于对WebSocket消息进行压缩和解压缩操作。
         pipeline.addLast(new WebSocketServerCompressionHandler());
         //可以对整个WebSocket通信进行初始化（当Http请求中有升级为WebSocket的请求时），以及握手处理
-        pipeline.addLast(new WebSocketServerProtocolHandler(nettyPath, null, true));
+        pipeline.addLast(new WebSocketServerProtocolHandler(nettyPath, null, true, 65536, false,true));
         //自定义的Handler-处理WebSocket文本类型的消息
         pipeline.addLast(new NettyTextHandler());
     }

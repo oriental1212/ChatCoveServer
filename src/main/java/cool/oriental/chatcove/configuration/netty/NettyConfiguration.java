@@ -6,7 +6,6 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -21,10 +20,10 @@ public class NettyConfiguration {
     private static final ChannelGroup onlineChannelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     // 存储所有在线的UserId与之对应的Channel
-    private static final ConcurrentMap<Long, Channel> onlineUserChannelMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Long, Channel> onlineUserMap = new ConcurrentHashMap<>();
 
     // 存储所有在线的频道与之对应的UserId和channel
-    private static final ConcurrentMap<Integer, List<ConcurrentMap<Long, Channel>>> onlineChannelMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Integer, ChannelGroup> onlineChannelMap = new ConcurrentHashMap<>();
     /**
      * 获取所有在线的客户端Channel
      */
@@ -35,8 +34,15 @@ public class NettyConfiguration {
     /**
      * 获取所有在线的UserId与之对应的Channel
      */
-    public static ConcurrentMap<Long, Channel> getOnlineUserChannelMap() {
-        return onlineUserChannelMap;
+    public static ConcurrentMap<Long, Channel> getOnlineUserMap() {
+        return onlineUserMap;
+    }
+
+    /**
+     * 获取频道对应的用户id
+     */
+    public static ConcurrentMap<Integer, ChannelGroup> getOnlineChannelMap(){
+        return onlineChannelMap;
     }
 
 }
