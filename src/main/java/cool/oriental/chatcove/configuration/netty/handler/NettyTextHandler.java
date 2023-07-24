@@ -90,16 +90,20 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
         ByteBuf content = msg.content();
         //接收到的文本信息
         String text = msg.text();
-        ctx.channel().writeAndFlush(new TextWebSocketFrame("你好"));
         String type = JSON.parseObject(text).get("type").toString();
         // 根据类型进行消息的出路
-        switch (EnumMessageType.valueOf(type)){
-            case PRIVATE_CHAT,GROUP_CHAT -> {
-                sendMsg(text , type, ctx.channel());
+        try {
+            switch (EnumMessageType.valueOf(type)){
+                case PRIVATE_CHAT,GROUP_CHAT -> {
+                    sendMsg(text , type, ctx.channel());
+                }
+                case REGISTER -> {
+                    register(ctx, text);
+                }
             }
-            case REGISTER -> {
-                register(ctx, text);
-            }
+        } catch (IllegalArgumentException e) {
+            log.debug("netty的Type校验异常");
+            ctx.channel().writeAndFlush(new TextWebSocketFrame("type错误"));
         }
     }
 
@@ -140,8 +144,14 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
         //获取接收到的消息的实体类
         WebSocketMessage messageClass = JSON.parseObject(message, WebSocketMessage.class);
         switch (type){
-            case "GROUP_CHAT" -> messageService.groupSendMessage();
-            case "PRIVATE_CHAT" -> messageService.privateSendMessage();
+            case "GROUP_CHAT" -> {
+                Boolean groupSendFlag = messageService.groupSendMessage(channel, messageClass);
+                if(!groupSendFlag){channel.writeAndFlush(new TextWebSocketFrame("发送失败"));}
+            }
+            case "PRIVATE_CHAT" -> {
+                Boolean privateSendFlag = messageService.privateSendMessage(channel, messageClass);
+                if(!privateSendFlag){channel.writeAndFlush(new TextWebSocketFrame("发送失败"));}
+            }
         }
     }
 

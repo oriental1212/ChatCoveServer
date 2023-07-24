@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
+@ToString
 @Accessors(chain = true)
 @TableName("message_private")
 public class MessagePrivate implements Serializable {
@@ -47,7 +49,7 @@ public class MessagePrivate implements Serializable {
     private Long receiverId;
 
     /**
-     * 消息类型
+     * 消息类型（0是文本消息，1是图片消息，2是音频消息）
      */
     @TableField("type")
     private Integer type;

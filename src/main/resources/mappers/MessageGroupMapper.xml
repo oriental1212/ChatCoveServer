@@ -22,4 +22,11 @@
         LIMIT 50
     </select>
 
+    <select id="GetChannelMessageOne" resultMap="getChannelMessageMap">
+        SELECT ud.avatar, cu.user_name, mg.id, mg.type, mg.content, mg.reply_id, mg.create_time
+        FROM user_detail ud
+        INNER JOIN channel_user cu ON ud.user_id = cu.user_id
+        INNER JOIN message_group mg ON ud.user_id = mg.sender_id
+        WHERE mg.sender_id = #{sendId} AND cu.channel_id = #{channelId} AND mg.create_time = #{createTime}
+    </select>
 </mapper>

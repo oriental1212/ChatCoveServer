@@ -3,6 +3,8 @@ package cool.oriental.chatcove.configuration.netty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.time.LocalDateTime;
+
 /**
  * @Author: Oriental
  * @Date: 2023-07-09-11:00
@@ -22,9 +24,9 @@ public class WebSocketMessage {
     // 消息类型
     private String messageType;
     // 消息内容
-    private String content;
+    private Object content;
     // 回复id，没有为null
-    private String replyId;
+    private Integer replyId;
     // 创建时间
-    private String createTime;
+    private LocalDateTime createTime;
 }
