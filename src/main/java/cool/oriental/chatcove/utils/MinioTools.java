@@ -32,6 +32,26 @@ public class MinioTools {
         return Boolean.FALSE;
     }
 
+    public Boolean UploadUserMiscFile(MultipartFile multipartFile){
+        String objectName = "miscFile" + "/" + multipartFile.getName() + "-" + DateUtil.thisMinute();
+        try{
+            minioConfiguration.MinioCreator().putObject(
+                    PutObjectArgs
+                            .builder()
+                            .bucket("user")
+                            .object(objectName)
+                            .stream(multipartFile.getInputStream(), multipartFile.getSize(), -1)
+                            .contentType(multipartFile.getContentType())
+                            .build()
+            );
+            return Boolean.TRUE;
+        } catch (Exception e){
+            e.printStackTrace();
+            log.error("上传文件工具类异常，用户杂项文件上传失败");
+            return Boolean.FALSE;
+        }
+    }
+
     public Boolean Delete(Integer channelId, MinioEnum minioEnum){
         switch (minioEnum.getType()){
             case "channel_delete" -> {

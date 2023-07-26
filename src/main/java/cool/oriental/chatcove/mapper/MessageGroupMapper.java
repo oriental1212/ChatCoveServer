@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import cool.oriental.chatcove.dto.ChannelMessage;
 import cool.oriental.chatcove.entity.MessageGroup;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -17,5 +16,5 @@ import java.util.List;
  */
 public interface MessageGroupMapper extends BaseMapper<MessageGroup> {
     List<ChannelMessage> GetChannelMessage(Integer channelId, Integer channelChildrenId);
-    ChannelMessage GetChannelMessageOne(Long sendId, Integer channelId, LocalDateTime createTime);
+    ChannelMessage GetChannelTextMessageOne(Long sendId, Integer messageGroupId);
 }

@@ -35,12 +35,13 @@ public class MinioConfiguration {
                 .credentials(account, password)
                 .build();
         try {
-            if(minioClient.bucketExists(BucketExistsArgs.builder().bucket("channel").build())){
-                return minioClient;
-            }else {
+            if(!minioClient.bucketExists(BucketExistsArgs.builder().bucket("channel").build())){
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket("channel").build());
-                return minioClient;
             }
+            if(!minioClient.bucketExists(BucketExistsArgs.builder().bucket("user").build())){
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket("user").build());
+            }
+            return minioClient;
         } catch (Exception e) {
             e.printStackTrace();
             log.error("初始化Minio桶异常");
