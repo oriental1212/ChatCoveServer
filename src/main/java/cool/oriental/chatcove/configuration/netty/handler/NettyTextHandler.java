@@ -11,6 +11,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.AttributeKey;
 import jakarta.annotation.Resource;
@@ -27,7 +28,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ChannelHandler.Sharable
 public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
-    public static final String USER_ID = "userId";
     @Resource
     MessageService messageService;
     public NettyTextHandler() {
@@ -100,6 +100,12 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
                 case REGISTER -> {
                     register(ctx, text);
                 }
+                case AUDIO -> {
+                    sendAudio(text, ctx.channel());
+                }
+                case HEART -> {
+                    return;
+                }
             }
         } catch (IllegalArgumentException e) {
             log.debug("netty的Type校验异常");
@@ -138,7 +144,9 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
     /*
      * 给指定的用户发送消息
      *
-     * @param textMessageJson
+     * @param message
+     * @param type
+     * @param channel
      */
     private void sendMsg(String message, String type, Channel channel) {
         //获取接收到的消息的实体类
@@ -152,6 +160,22 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
                 Boolean privateSendFlag = messageService.privateSendMessage(channel, messageClass);
                 if(!privateSendFlag){channel.writeAndFlush(new TextWebSocketFrame("发送失败"));}
             }
+        }
+    }
+
+    /*
+     * 给群组用户发送语音消息
+     *
+     * @param textMessageJson
+     */
+    private void sendAudio(Object text, Channel channel){
+        Object channelId = JSON.parseObject((String) text).get("channelId").toString();
+        ChannelGroup channelList = NettyConfiguration.getOnlineChannelMap().get(channelId);
+        if(channelList == null){
+            return;
+        }
+        if(channelList.contains(channel)){
+            channelList.writeAndFlush(JSON.parseObject((String) text).get("content").toString());
         }
     }
 

@@ -16,6 +16,10 @@ public enum EnumMessageType {
     PRIVATE_CHAT,
     // 群聊
     GROUP_CHAT,
+    // 音频
+    AUDIO,
+    // 心跳
+    HEART,
     // 注册
     REGISTER;
 }
