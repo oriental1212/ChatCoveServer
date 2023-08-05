@@ -2,6 +2,7 @@ package cool.oriental.chatcove.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import cool.oriental.chatcove.configuration.exception.Result;
@@ -57,7 +58,7 @@ public class ChannelServiceImpl implements ChannelService {
     private String minioServerUrl;
 
     @Override
-    public Result<String> CreateMasterChannel(ChannelFontInfo channelFontInfo) {
+    public Result<Object> CreateMasterChannel(ChannelFontInfo channelFontInfo) {
         LambdaQueryWrapper<ChannelInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChannelInfo::getName,channelFontInfo.getChannelName());
         ChannelInfo channelInfoOne = channelInfoMapper.selectOne(queryWrapper);
@@ -96,7 +97,10 @@ public class ChannelServiceImpl implements ChannelService {
                 // 添加日志
                 Boolean flag = InsertLog(channelId, EnumChannelLog.CHANNEL_INSERT, "创建新的主频道");
                 if(flag == Boolean.TRUE){
-                    return Result.success(avatarUrl);
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("channelId", channelId);
+                    jsonObject.put("avatarUrl", avatarUrl);
+                    return Result.success(jsonObject);
                 }
                 else{
                     return Result.error("创建主频道失败");
@@ -467,7 +471,7 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
     @Override
-    public Result<String> CreateUser(Integer channelId, String nickName) {
+    public Result<Object> CreateUser(Integer channelId, String nickName) {
         ChannelInfo channelInfoOne = channelInfoMapper.selectById(channelId);
         if(channelInfoOne == null){
             return Result.error("不存在该频道，请稍后重试");
@@ -482,7 +486,10 @@ public class ChannelServiceImpl implements ChannelService {
                     .setActiveTime(DateUtil.parse(DateUtil.now()).toLocalDateTime())
             );
             if(insertFlag>0){
-                return Result.success("加入频道成功");
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("channelName", channelInfoOne.getName());
+                jsonObject.put("avatarUrl", channelInfoOne.getAvatar());
+                return Result.success(jsonObject);
             }else{
                 return Result.error("加入频道失败");
             }

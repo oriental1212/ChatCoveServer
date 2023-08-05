@@ -82,6 +82,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     @Override
     public Result<String> LoginByAccount(String account, String password) {
+        if(StpUtil.getLoginIdDefaultNull() != null){
+            return Result.error("该用户已登录，禁止重复登录");
+        }
         UserInfo userInfo = UserHasInfo(account);
         try {
             if(userInfo == null){
@@ -89,7 +92,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             }else{
                 if(BCrypt.checkpw(password,userInfo.getPassword())){
                     StpUtil.login(userInfo.getId());
-                    return Result.success("用户登录成功");
+                    return Result.success(StpUtil.getTokenInfo().tokenValue);
                 }else {
                     return Result.error("用户密码错误,请稍后重试");
                 }
@@ -103,6 +106,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     @Override
     public Result<String> LoginByCaptcha(CheckByCaptchaInfo checkByCaptchaInfo) {
+        if(StpUtil.getLoginIdDefaultNull() != null){
+            return Result.error("该用户已登录，禁止重复登录");
+        }
         UserInfo userInfo = UserHasInfo(checkByCaptchaInfo.getAccount());
         if(userInfo == null){
             return Result.error("不存在该用户");
@@ -111,7 +117,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             Boolean flag = CheckCaptcha((checkByCaptchaInfo.getAccount() + checkByCaptchaInfo.getSendFlag()), checkByCaptchaInfo.getCaptcha());
             if(flag){
                 StpUtil.login(userInfo.getId());
-                return Result.success("用户登录成功");
+                return Result.success(StpUtil.getTokenInfo().tokenValue);
             }else {
                 return Result.error("验证码错误，请稍后重试");
             }

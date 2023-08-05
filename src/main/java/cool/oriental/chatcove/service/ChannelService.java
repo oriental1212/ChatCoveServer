@@ -18,7 +18,7 @@ import java.util.List;
  * @Description: 频道服务接口
  */
 public interface ChannelService {
-    Result<String> CreateMasterChannel(ChannelFontInfo channelFontInfo);
+    Result<Object> CreateMasterChannel(ChannelFontInfo channelFontInfo);
     Result<String> UpdateMasterChannel(ChannelFontInfo channelFontInfo, Integer channelId, Boolean updateAvatarFlag);
     Result<String> DeleteMasterChannel(Integer channelId);
     Result<String> CreateChildrenChannel(ChannelChildrenInfo channelChildrenInfo);
@@ -29,7 +29,7 @@ public interface ChannelService {
     Result<String> DeleteRole(Integer channelId, Integer roleId);
     Result<String> UploadEmoji(EmojiInfo emojiInfo);
     Result<String> DeleteEmoji(Integer channelId, Integer emojiId);
-    Result<String> CreateUser(Integer channelId, String nickName);
+    Result<Object> CreateUser(Integer channelId, String nickName);
     Result<String> ChangeUserName(Integer channelId, String remarkNickName);
     Result<String> DeleteUser(Integer channelId, Long userId);
     Result<String> ExitChannel(Integer channelId);

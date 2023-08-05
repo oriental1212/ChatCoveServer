@@ -1,5 +1,6 @@
 package cool.oriental.chatcove.utils;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import cool.oriental.chatcove.configuration.minio.MinioConfiguration;
 import cool.oriental.chatcove.configuration.minio.MinioEnum;
@@ -27,11 +28,36 @@ public class MinioTools {
             case "channel_emoji_upload" -> {
                 return ChannelEmojiUpload(multipartFile, channelId);
             }
-            case "user" -> System.out.println("USER_AVATAR");
         }
         return Boolean.FALSE;
     }
 
+    // 用户头像上传
+    public Boolean uploadUserAvatar(MultipartFile multipartFile, MinioEnum minioEnum){
+        if(minioEnum.getType().equals("user_avatar")){
+            String objectName = "avatar/" + StpUtil.getLoginIdAsString();
+            try{
+                minioConfiguration.MinioCreator().putObject(
+                        PutObjectArgs
+                                .builder()
+                                .bucket("user")
+                                .object(objectName)
+                                .stream(multipartFile.getInputStream(), multipartFile.getSize(), -1)
+                                .contentType(multipartFile.getContentType())
+                                .build()
+                );
+                return Boolean.TRUE;
+            } catch (Exception e){
+                e.printStackTrace();
+                log.error("上传文件工具类异常，用户杂项文件上传失败");
+                return Boolean.FALSE;
+            }
+        }else{
+            return Boolean.FALSE;
+        }
+    }
+
+    // 用户表情上传
     public Boolean UploadUserMiscFile(MultipartFile multipartFile){
         String objectName = "miscFile" + "/" + multipartFile.getName() + "-" + DateUtil.thisMinute();
         try{

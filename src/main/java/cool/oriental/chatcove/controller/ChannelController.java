@@ -34,7 +34,7 @@ public class ChannelController {
 
     @PostMapping("/createMasterChannel")
     @Operation(summary = "创建总频道")
-    public Result<String> CreateMasterChannel(
+    public Result<Object> CreateMasterChannel(
             @RequestBody @Valid @Parameter(description = "创建频道信息") ChannelFontInfo channelFontInfo
     ){
         if(channelFontInfo.getAvatar().isEmpty()){
@@ -141,7 +141,7 @@ public class ChannelController {
 
     @PostMapping("/createUser")
     @Operation(summary = "新增频道人员")
-    public Result<String> CreateUser(
+    public Result<Object> CreateUser(
             @RequestParam(value = "channelId") @Parameter(description = "频道id") Integer channelId,
             @RequestParam(value = "nickName") @Parameter(description = "用户昵称") String nickName
     ){

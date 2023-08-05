@@ -4,16 +4,20 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import cool.oriental.chatcove.configuration.exception.Result;
+import cool.oriental.chatcove.configuration.minio.MinioEnum;
 import cool.oriental.chatcove.entity.UserDetail;
 import cool.oriental.chatcove.entity.UserInfo;
 import cool.oriental.chatcove.mapper.UserDetailMapper;
 import cool.oriental.chatcove.mapper.UserInfoMapper;
 import cool.oriental.chatcove.service.SettingService;
+import cool.oriental.chatcove.utils.MinioTools;
 import cool.oriental.chatcove.utils.SendCaptchaTools;
 import cool.oriental.chatcove.vo.ChangeUserSetting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Author: Oriental
@@ -28,6 +32,9 @@ public class SettingServiceImpl implements SettingService {
     UserDetailMapper userDetailMapper;
     @Resource
     UserInfoMapper userInfoMapper;
+
+    @Value("${minio.url}")
+    private String minioServerUrl;
     @Override
     public Result<String> ChangeUserSetting(ChangeUserSetting changeUserSetting) {
         try {
@@ -35,7 +42,6 @@ public class SettingServiceImpl implements SettingService {
             userDetailWrapper
                     .eq(UserDetail::getUserId, StpUtil.getLoginIdAsLong())
                     .set(UserDetail::getNickName, changeUserSetting.getNickName())
-                    .set(UserDetail::getAvatar, changeUserSetting.getAvatar())
                     .set(UserDetail::getSummary, changeUserSetting.getSummery())
                     .set(UserDetail::getGender, changeUserSetting.getGender())
                     .set(UserDetail::getBirthday, changeUserSetting.getBirthday())
@@ -47,6 +53,28 @@ public class SettingServiceImpl implements SettingService {
             return Result.error("服务器异常，用户修改个人设置失败，请稍后重试");
         }
         return Result.success("修改个人设置成功");
+    }
+
+    @Override
+    public Result<String> UploadUserAvatar(MultipartFile multipartFile) {
+        Boolean uploadFlag = new MinioTools().uploadUserAvatar(multipartFile, MinioEnum.USER_AVATAR);
+        if(!uploadFlag){
+            return Result.error("用户头像上传失败");
+        }else{
+            try {
+                String avatarUrl = minioServerUrl+"/user/avatar/" + StpUtil.getLoginIdAsString();
+                LambdaUpdateWrapper<UserDetail> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper
+                        .eq(UserDetail::getUserId, StpUtil.getLoginIdAsLong())
+                        .set(UserDetail::getAvatar, avatarUrl);
+                userDetailMapper.update(null, updateWrapper);
+                return Result.success(avatarUrl);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("上传用户头像失败");
+                return Result.error("服务器异常，设置用户头像失败，请稍后重试");
+            }
+        }
     }
 
     @Override

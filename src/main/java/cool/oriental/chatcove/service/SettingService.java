@@ -2,6 +2,7 @@ package cool.oriental.chatcove.service;
 
 import cool.oriental.chatcove.configuration.exception.Result;
 import cool.oriental.chatcove.vo.ChangeUserSetting;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Author: Oriental
@@ -11,5 +12,6 @@ import cool.oriental.chatcove.vo.ChangeUserSetting;
 public interface SettingService {
     Result<String> ChangeUserSetting(ChangeUserSetting changeUserSetting);
     Result<String> SendCaptchaToChangPassword();
-    public Result<String> ChangePassword(String password, String captcha);
+    Result<String> UploadUserAvatar(MultipartFile multipartFile);
+    Result<String> ChangePassword(String password, String captcha);
 }

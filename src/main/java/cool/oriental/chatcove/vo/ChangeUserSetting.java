@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @Accessors(chain = true)
 public class ChangeUserSetting {
     private String nickName;
-    private String avatar;
     private String summery;
     private String gender;
     private LocalDate birthday;

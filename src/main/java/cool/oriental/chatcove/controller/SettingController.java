@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Author: Oriental
@@ -26,6 +27,18 @@ public class SettingController {
     @Operation(summary = "更改用户设置")
     public Result<String> ChangeUserSetting(@RequestBody @Valid @Parameter(description = "用户注册vo类") ChangeUserSetting changeUserSetting){
         return settingService.ChangeUserSetting(changeUserSetting);
+    }
+
+    @PostMapping("/uploadUserAvatar")
+    @Operation(summary = "上传用户头像")
+    public Result<String> UploadUserAvatar(@RequestBody @Parameter(description = "用户头像") MultipartFile multipartFile){
+        if(multipartFile.isEmpty()){
+            return Result.error("上传文件为空");
+        }
+        if(multipartFile.getSize() > (5*1024*1024)){
+            return Result.error("文件大小超出限制");
+        }
+        return settingService.UploadUserAvatar(multipartFile);
     }
 
     @PostMapping("/sendCaptchaToChangPassword")

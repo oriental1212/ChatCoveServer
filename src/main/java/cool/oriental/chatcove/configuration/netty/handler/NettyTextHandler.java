@@ -94,17 +94,10 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
         // 根据类型进行消息的出路
         try {
             switch (EnumMessageType.valueOf(type)){
-                case PRIVATE_CHAT,GROUP_CHAT -> {
-                    sendMsg(text , type, ctx.channel());
-                }
-                case REGISTER -> {
-                    register(ctx, text);
-                }
-                case AUDIO -> {
-                    sendAudio(text, ctx.channel());
-                }
+                case PRIVATE_CHAT,GROUP_CHAT -> sendMsg(text , type, ctx.channel());
+                case REGISTER -> register(ctx, text);
+                case AUDIO -> sendAudio(text, ctx.channel());
                 case HEART -> {
-                    return;
                 }
             }
         } catch (IllegalArgumentException e) {
