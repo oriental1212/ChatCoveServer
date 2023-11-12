@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author oriental
@@ -47,7 +47,7 @@ public class MessageGroup implements Serializable {
     private Integer channelId;
 
     /**
-     * 消息类型
+     * 消息类型（0是文本消息，1是图片消息，2是音频消息）
      */
     @TableField("type")
     private Integer type;

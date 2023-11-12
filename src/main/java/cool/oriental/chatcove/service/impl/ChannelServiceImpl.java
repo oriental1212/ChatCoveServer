@@ -826,15 +826,14 @@ public class ChannelServiceImpl implements ChannelService {
         } else if (!channelChildrenOne.getType().equals(0)) {
             return Result.error("该频道不是文字频道");
         }
-        List<ChannelMessage> channelMessageList = null;
         try {
-            channelMessageList = messageGroupMapper.GetChannelMessage(channelId, childrenChannelId);
+            List<ChannelMessage> channelMessageList = messageGroupMapper.GetChannelMessage(channelId, childrenChannelId);
+            return Result.success(channelMessageList);
         } catch (Exception e) {
             e.printStackTrace();
             log.error("获取子频道消息业务异常");
             return Result.error("服务器异常，查询频道消息失败，请稍后重试");
         }
-        return Result.success(channelMessageList);
     }
 
     // 添加日志

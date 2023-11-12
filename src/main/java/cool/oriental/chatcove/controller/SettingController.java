@@ -25,7 +25,7 @@ public class SettingController {
     SettingService settingService;
     @PostMapping("/changeUserSetting")
     @Operation(summary = "更改用户设置")
-    public Result<String> ChangeUserSetting(@RequestBody @Valid @Parameter(description = "用户注册vo类") ChangeUserSetting changeUserSetting){
+    public Result<String> ChangeUserSetting(@RequestBody @Valid @Parameter(description = "用户设置修改类") ChangeUserSetting changeUserSetting){
         return settingService.ChangeUserSetting(changeUserSetting);
     }
 

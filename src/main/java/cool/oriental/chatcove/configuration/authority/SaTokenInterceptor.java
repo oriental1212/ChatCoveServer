@@ -22,6 +22,7 @@ public class SaTokenInterceptor implements WebMvcConfigurer{
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/authority/loginByAccount",
+                        "/authority/register",
                         "/static/**"
                 );
     }

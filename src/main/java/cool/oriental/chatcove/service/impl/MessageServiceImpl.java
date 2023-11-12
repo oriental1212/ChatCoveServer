@@ -119,6 +119,7 @@ public class MessageServiceImpl implements MessageService {
             return;
         }
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("messageType", "friendNotify");
         jsonObject.put("type", type);
         for (FriendInfo friendInfo : friendList) {
             Channel channel = NettyConfiguration.getOnlineUserMap().get(friendInfo.getUserId());
@@ -149,7 +150,10 @@ public class MessageServiceImpl implements MessageService {
                 // 存储消息
                 insertFlag = messagePrivateMapper.insert(messagePrivate);
                 MessagePrivate messagePrivateOne = messagePrivateMapper.selectById(messagePrivate.getId());
-                receiverChannel.writeAndFlush(new TextWebSocketFrame(messagePrivateOne.toString()));
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("messageType", "privateSendTextMessage");
+                jsonObject.put("data", messagePrivateOne);
+                receiverChannel.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
             // 好友不在线
             }else{
                 messagePrivate.setFlag(false);
@@ -182,7 +186,10 @@ public class MessageServiceImpl implements MessageService {
             ChannelMessage channelMessageOne = messageGroupMapper.GetChannelTextMessageOne(sendId, messageGroup.getId());
             // 群发消息
             ChannelGroup groupChannel = NettyConfiguration.getOnlineChannelMap().get(Integer.parseInt(webSocketMessage.getReceiverId()));
-            groupChannel.writeAndFlush(new TextWebSocketFrame(channelMessageOne.toString()));
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("messageType", "groupSendTextMessage");
+            jsonObject.put("data", channelMessageOne);
+            groupChannel.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
             return (insertFlag>0)?Boolean.TRUE:Boolean.FALSE;
         } catch (NumberFormatException e) {
             e.printStackTrace();
@@ -219,7 +226,10 @@ public class MessageServiceImpl implements MessageService {
                 // 存储消息
                 insertFlag = messagePrivateMapper.insert(messagePrivate);
                 MessagePrivate messagePrivateOne = messagePrivateMapper.selectById(messagePrivate.getId());
-                receiverChannel.writeAndFlush(new TextWebSocketFrame(messagePrivateOne.toString()));
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("messageType", "privateSendMultipartFileMessage");
+                jsonObject.put("data", messagePrivateOne);
+                receiverChannel.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
             // 好友不在线
             }else{
                 messagePrivate.setFlag(false);
@@ -255,7 +265,10 @@ public class MessageServiceImpl implements MessageService {
             ChannelMessage channelMessageOne = messageGroupMapper.GetChannelTextMessageOne(sendId, messageGroup.getId());
             // 群发消息
             ChannelGroup groupChannel = NettyConfiguration.getOnlineChannelMap().get(Integer.parseInt(webSocketMessage.getReceiverId()));
-            groupChannel.writeAndFlush(new TextWebSocketFrame(channelMessageOne.toString()));
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("messageType", "privateSendMultipartFileMessage");
+            jsonObject.put("data", channelMessageOne);
+            groupChannel.writeAndFlush(new TextWebSocketFrame(jsonObject.toString()));
             return (insertFlag>0)?Boolean.TRUE:Boolean.FALSE;
         }catch (Exception e) {
             e.printStackTrace();

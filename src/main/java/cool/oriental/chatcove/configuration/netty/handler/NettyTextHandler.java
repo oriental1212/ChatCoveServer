@@ -13,6 +13,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.AttributeKey;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @ChannelHandler.Sharable
-public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
+public class NettyTextHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
+
     @Resource
     MessageService messageService;
     public NettyTextHandler() {
@@ -85,32 +87,34 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
      * 当接收到前端发送的WebSocket时处理
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg){
-        //接收到的文本信息的二进制形式
-        ByteBuf content = msg.content();
-        //接收到的文本信息
-        String text = msg.text();
-        String type = JSON.parseObject(text).get("type").toString();
-        // 根据类型进行消息的出路
-        try {
-            switch (EnumMessageType.valueOf(type)){
-                case PRIVATE_CHAT,GROUP_CHAT -> sendMsg(text , type, ctx.channel());
-                case REGISTER -> register(ctx, text);
-                case AUDIO -> sendAudio(text, ctx.channel());
-                case HEART -> {
+    protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame msg){
+        if(msg instanceof TextWebSocketFrame){
+            //接收到的文本信息的二进制形式
+            ByteBuf content = msg.content();
+            //接收到的文本信息
+            String text = ((TextWebSocketFrame) msg).text();
+            String type = JSON.parseObject(text).get("type").toString();
+            // 根据类型进行消息的出路
+            try {
+                switch (EnumMessageType.valueOf(type)){
+                    case PRIVATE_CHAT,GROUP_CHAT -> sendMsg(text , type, ctx.channel());
+                    case REGISTER -> register(ctx, text);
+                    case AUDIO -> sendAudio(text, ctx.channel());
+                    case HEART -> {
+                    }
                 }
+            } catch (IllegalArgumentException e) {
+                log.debug("netty的Type校验异常");
+                ctx.channel().writeAndFlush(new TextWebSocketFrame("type错误"));
             }
-        } catch (IllegalArgumentException e) {
-            log.debug("netty的Type校验异常");
-            ctx.channel().writeAndFlush(new TextWebSocketFrame("type错误"));
         }
     }
 
-    /*
+    /**
      * 将连接的客户端注册到服务端中
      *
      * @param ctx
-     * @param text
+     * @param text 文本
      */
     private void register(ChannelHandlerContext ctx, String text) {
         String tokenValue = JSON.parseObject(text).get("ChatCoveToken").toString();
@@ -134,12 +138,12 @@ public class NettyTextHandler extends SimpleChannelInboundHandler<TextWebSocketF
         }
     }
 
-    /*
+    /**
      * 给指定的用户发送消息
      *
-     * @param message
-     * @param type
-     * @param channel
+     * @param message 信息
+     * @param type 类型
+     * @param channel 管道
      */
     private void sendMsg(String message, String type, Channel channel) {
         //获取接收到的消息的实体类
